@@ -359,6 +359,17 @@ tbody tr:hover{background:#f8faff}
 .horizontal-options{
   flex-wrap:nowrap;
 }
+
+.tire-storage-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(220px,auto);
+  gap:28px;
+  align-items:start;
+  margin-top:2px;
+}
+.tire-storage-row > .field{min-width:0}
+.radcover-inline{padding-left:6px}
+.radcover-inline .wash-toggle{margin-top:0; border:0; padding:8px 0; background:transparent; border-radius:0; box-shadow:none}
 .seasons label{
   display:flex;align-items:center;gap:7px;border:1px solid var(--line);
   padding:9px 11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer
@@ -495,6 +506,8 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin:18px 0 30px}
   .tire-construction-row{grid-template-columns:1fr}
   .rdks-type{min-width:0;width:100%;max-width:none}
   .horizontal-options{flex-wrap:wrap}
+  .tire-storage-row{grid-template-columns:1fr;gap:12px}
+  .radcover-inline{padding-left:0}
   .detail{grid-template-columns:1fr 1fr}
   .modal-content{padding:16px}
   .car-grid{grid-template-columns:1fr 160px 1fr}
