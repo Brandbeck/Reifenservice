@@ -368,6 +368,10 @@ tbody tr:hover{background:#f8faff}
 .pill.plate-pill{
   font-size:13px;font-weight:900;color:#151c29;
   padding:6px 10px;letter-spacing:.15px;
+  white-space:nowrap !important;
+  display:inline-flex;align-items:center;
+  width:max-content;max-width:none;
+  flex:0 0 auto;
 }
 .storage{font-weight:800;color:#344252}
 .empty{
@@ -1276,7 +1280,7 @@ body:not(.authenticated) .page{display:none}
   td{font-size:12px;line-height:1.25}
   th:nth-child(1),td:nth-child(1){width:6%}
   th:nth-child(2),td:nth-child(2){width:17%}
-  th:nth-child(3),td:nth-child(3){width:10%}
+  th:nth-child(3),td:nth-child(3){width:12%;min-width:112px}
   th:nth-child(4),td:nth-child(4){width:10%}
   th:nth-child(5),td:nth-child(5){width:8%}
   th:nth-child(6),td:nth-child(6){width:17%}
