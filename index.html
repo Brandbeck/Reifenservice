@@ -334,6 +334,33 @@ input:focus,select:focus,textarea:focus{
 .actions{
   display:flex;align-items:flex-end;gap:8px
 }
+
+/* App-Navigation */
+.app-nav{display:flex;gap:8px;margin:0 0 14px;padding:5px;background:#eef3fa;border:1px solid #dbe4ef;border-radius:14px;width:max-content;max-width:100%}
+.app-nav-btn{border:0;background:transparent;color:#536173;padding:10px 16px;border-radius:10px;font:inherit;font-size:13px;font-weight:900;cursor:pointer;white-space:nowrap}
+.app-nav-btn.active{background:#fff;color:var(--accent);box-shadow:0 3px 10px rgba(24,39,58,.08)}
+.app-view{display:none}.app-view.active{display:block}
+.calendar-card{overflow:hidden}.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fbfdff 0%,#f7faff 100%)}
+.calendar-title-wrap{min-width:0}.calendar-title{margin:0;font-size:21px;letter-spacing:-.02em}.calendar-subtitle{margin:4px 0 0;color:var(--muted);font-size:12px}
+.calendar-actions{display:flex;gap:8px;align-items:center}.calendar-actions .btn{padding:9px 12px}.calendar-month-nav{display:flex;align-items:center;gap:7px}
+.calendar-nav-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#334155;font-size:19px;font-weight:900;cursor:pointer}
+.calendar-nav-btn:hover{background:#f7f9fb}.calendar-grid-wrap{padding:14px}
+.calendar-weekdays,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.calendar-weekdays{margin-bottom:5px}
+.calendar-weekday{padding:6px 8px;color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.calendar-grid{border-top:1px solid var(--line);border-left:1px solid var(--line);border-radius:10px 10px 0 0;overflow:hidden}
+.calendar-day{min-height:118px;padding:7px;background:#fff;border-right:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
+.calendar-day.other-month{background:#fafbfd}.calendar-day.today{box-shadow:inset 0 0 0 2px rgba(31,94,255,.55)}
+.calendar-day-number{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;color:#44515e;font-size:11px;font-weight:900}
+.calendar-day.other-month .calendar-day-number{color:#a4afbc}.calendar-day-number .today-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:block}
+.calendar-event{display:block;width:100%;margin:0 0 4px;padding:5px 6px;border:1px solid #d6e0ff;border-radius:7px;background:#eef3ff;color:#2349a5;text-align:left;cursor:pointer;overflow:hidden}
+.calendar-event:hover{background:#e4ecff}.calendar-event-name{display:block;font-size:10px;line-height:1.2;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calendar-event-meta{display:block;margin-top:2px;color:#53698f;font-size:9px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calendar-event-season{display:inline-block;margin-top:3px;font-size:8px;font-weight:900;color:#1748c7}.calendar-more{color:var(--muted);font-size:9px;font-weight:800;padding:2px 4px}
+.calendar-legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:0 14px 14px;color:var(--muted);font-size:11px}
+.calendar-legend span{display:inline-flex;align-items:center;gap:5px}.calendar-legend i{width:9px;height:9px;border-radius:3px;background:#eef3ff;border:1px solid #d6e0ff}
+.calendar-count{padding:7px 10px;border-radius:999px;background:#eef3ff;color:var(--accent);font-size:11px;font-weight:900;white-space:nowrap}
+@media (max-width:800px){.app-nav{width:100%}.app-nav-btn{flex:1}.calendar-head{align-items:flex-start;flex-direction:column}.calendar-actions{width:100%;justify-content:space-between}.calendar-month-nav{margin-left:auto}}
+@media (max-width:700px){.calendar-grid-wrap{padding:8px}.calendar-weekday{padding:5px 3px;font-size:8px;text-align:center}.calendar-day{min-height:96px;padding:5px 3px}.calendar-day-number{font-size:10px;margin-bottom:4px;padding:0 2px}.calendar-event{padding:4px;border-radius:6px}.calendar-event-name{font-size:8px}.calendar-event-meta{font-size:7px}.calendar-event-season{font-size:7px}.calendar-more{font-size:7px}.calendar-title{font-size:18px}.calendar-actions .btn{font-size:11px;padding:8px 9px}}
 .tablewrap{overflow:auto}
 table{border-collapse:collapse;width:100%;min-width:760px}
 th,td{padding:14px 18px;text-align:left !important;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -1450,6 +1477,12 @@ body:not(.authenticated) .page{display:none}
     </div>
   </header>
 
+  <nav class="app-nav" aria-label="Bereiche">
+    <button class="app-nav-btn active" id="navCustomers" type="button">👥 Kundenübersicht</button>
+    <button class="app-nav-btn" id="navCalendar" type="button">📅 Kalender</button>
+  </nav>
+
+  <main id="customersView" class="app-view active">
   <section class="card">
     <div class="card-head">
       <div>
@@ -1543,6 +1576,37 @@ body:not(.authenticated) .page{display:none}
       Mit „Kunde hinzufügen“ legst du den ersten Datensatz an.
     </div>
   </section>
+  </main>
+
+  <main id="calendarView" class="app-view">
+    <section class="card calendar-card">
+      <div class="calendar-head">
+        <div class="calendar-title-wrap">
+          <h2 class="calendar-title" id="calendarMonthTitle">Kalender</h2>
+          <p class="calendar-subtitle">Wechseltermine aus der Kundendatenbank werden automatisch hier eingetragen.</p>
+        </div>
+        <div class="calendar-actions">
+          <span class="calendar-count" id="calendarCount">0 Termine</span>
+          <button class="btn secondary" id="calendarTodayBtn" type="button">Heute</button>
+          <div class="calendar-month-nav">
+            <button class="calendar-nav-btn" id="calendarPrevBtn" type="button" aria-label="Vorheriger Monat">‹</button>
+            <button class="calendar-nav-btn" id="calendarNextBtn" type="button" aria-label="Nächster Monat">›</button>
+          </div>
+        </div>
+      </div>
+      <div class="calendar-grid-wrap">
+        <div class="calendar-weekdays" aria-hidden="true">
+          <div class="calendar-weekday">Mo</div><div class="calendar-weekday">Di</div><div class="calendar-weekday">Mi</div>
+          <div class="calendar-weekday">Do</div><div class="calendar-weekday">Fr</div><div class="calendar-weekday">Sa</div><div class="calendar-weekday">So</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+      <div class="calendar-legend">
+        <span><i></i> Wechseltermin</span>
+        <span>💡 Ein Termin kann angeklickt werden, um den Kunden direkt zu öffnen.</span>
+      </div>
+    </section>
+  </main>
 
   <footer>Online-Datenbank über Supabase. Die Anmeldung schützt den Zugriff auf die Kundendaten.</footer>
 </div>
@@ -2436,6 +2500,82 @@ function initializeCustomerColumnResizers(force=false){
   });
 }
 
+let calendarDate = new Date();
+calendarDate.setDate(1);
+
+function calendarDateKey(date){
+  const y = date.getFullYear();
+  const m = String(date.getMonth()+1).padStart(2,"0");
+  const d = String(date.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+function calendarDateFromISO(value){
+  if(!value) return null;
+  const normalized = normalizeAppointmentDate(value);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return null;
+  const [y,m,d] = normalized.split("-").map(Number);
+  const date = new Date(y,m-1,d);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+function getCalendarEvents(){
+  return customers.map(c => {
+    const date = calendarDateFromISO(c.changeAppointment);
+    if(!date) return null;
+    const season = c.storedSeason || c.season || firstStoredSeason(c) || "";
+    return {id:c.id,dateKey:calendarDateKey(date),firstName:c.firstName||"",lastName:c.lastName||"",licensePlate:c.licensePlate||"",season};
+  }).filter(Boolean).sort((a,b)=>{
+    const na=`${a.lastName} ${a.firstName}`.trim(), nb=`${b.lastName} ${b.firstName}`.trim();
+    return na.localeCompare(nb,"de");
+  });
+}
+function renderCalendar(){
+  const grid=$("calendarGrid"), title=$("calendarMonthTitle"), count=$("calendarCount");
+  if(!grid || !title || !count) return;
+  const year=calendarDate.getFullYear(), month=calendarDate.getMonth();
+  title.textContent=calendarDate.toLocaleDateString("de-DE",{month:"long",year:"numeric"});
+  const events=getCalendarEvents(), byDate=new Map();
+  events.forEach(ev=>{if(!byDate.has(ev.dateKey)) byDate.set(ev.dateKey,[]); byDate.get(ev.dateKey).push(ev);});
+  const startOffset=(new Date(year,month,1).getDay()+6)%7;
+  const todayKey=calendarDateKey(new Date());
+  let html="";
+  for(let i=0;i<42;i++){
+    const date=new Date(year,month,1+i-startOffset), key=calendarDateKey(date);
+    const dayEvents=byDate.get(key)||[], isOther=date.getMonth()!==month, isToday=key===todayKey;
+    html+=`<div class="calendar-day${isOther?" other-month":""}${isToday?" today":""}">
+      <div class="calendar-day-number"><span>${date.getDate()}</span>${isToday?'<span class="today-dot" aria-label="Heute"></span>':""}</div>`;
+    dayEvents.slice(0,3).forEach(ev=>{
+      const name=`${ev.firstName} ${ev.lastName}`.trim()||"Unbekannter Kunde";
+      html+=`<button type="button" class="calendar-event" data-customer-id="${esc(ev.id)}" title="${esc(name)} – ${esc(ev.licensePlate||"Kein Kennzeichen")}">
+        <span class="calendar-event-name">${esc(name)}</span>
+        <span class="calendar-event-meta">${esc(ev.licensePlate||"Kein Kennzeichen")}</span>
+        ${ev.season?`<span class="calendar-event-season">${esc(ev.season.replace("reifen",""))}</span>`:""}
+      </button>`;
+    });
+    if(dayEvents.length>3) html+=`<div class="calendar-more">+ ${dayEvents.length-3} weitere</div>`;
+    html+="</div>";
+  }
+  grid.innerHTML=html;
+  count.textContent=`${events.length} ${events.length===1?"Termin":"Termine"}`;
+  grid.querySelectorAll(".calendar-event").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation(); switchView("customers"); openCustomer(btn.dataset.customerId);
+  }));
+}
+function switchView(view){
+  const cal=view==="calendar";
+  $("customersView")?.classList.toggle("active",!cal);
+  $("calendarView")?.classList.toggle("active",cal);
+  $("navCustomers")?.classList.toggle("active",!cal);
+  $("navCalendar")?.classList.toggle("active",cal);
+  if(cal) renderCalendar();
+}
+function shiftCalendarMonth(delta){
+  calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()+delta,1);
+  renderCalendar();
+}
+function resetCalendarToToday(){
+  const now=new Date(); calendarDate=new Date(now.getFullYear(),now.getMonth(),1); renderCalendar();
+}
+
 function render(){
   const list = getDisplayedCustomers();
   const displaySeason = $("sort").value === "status" ? $("statusSeason").value : "";
@@ -2459,6 +2599,7 @@ function render(){
   }).join("");
   $("empty").style.display = list.length ? "none" : "block";
   initializeCustomerColumnResizers();
+  renderCalendar();
   $("customerList").querySelectorAll("tr[data-id]").forEach(tr=>tr.addEventListener("click",e=>{ if(e.target.closest("button")) return; openCustomer(tr.dataset.id); }));
   $("customerList").querySelectorAll(".pdfBtn").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();printCustomer(btn.dataset.id);}));
 }
@@ -2671,6 +2812,11 @@ function openCustomer(id){
 function closeModal(){ $("modal").classList.remove("open"); }
 
 $("addBtn").onclick=openNew;
+$("navCustomers").onclick=()=>switchView("customers");
+$("navCalendar").onclick=()=>switchView("calendar");
+$("calendarPrevBtn").onclick=()=>shiftCalendarMonth(-1);
+$("calendarNextBtn").onclick=()=>shiftCalendarMonth(1);
+$("calendarTodayBtn").onclick=resetCalendarToToday;
 $("closeBtn").onclick=closeModal;
 $("cancelBtn").onclick=closeModal;
 function updateStatusFilterVisibility(){
