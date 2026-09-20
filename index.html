@@ -327,7 +327,7 @@ tbody tr:hover{background:#f8faff}
 }
 .storage-appointment-row{
   display:grid;
-  grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   gap:16px;
   margin:14px 0;
   padding:14px;
@@ -358,9 +358,6 @@ tbody tr:hover{background:#f8faff}
 }
 .horizontal-options{
   flex-wrap:nowrap;
-}
-.vehicle-extra-row{
-  grid-template-columns:minmax(0,1fr) minmax(220px,1fr);
 }
 .seasons label{
   display:flex;align-items:center;gap:7px;border:1px solid var(--line);
@@ -496,7 +493,6 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin:18px 0 30px}
   .customer-top{grid-template-columns:minmax(0,1fr) 150px;grid-column:1/-1}
   .form-section-body{padding:13px}
   .tire-construction-row{grid-template-columns:1fr}
-  .vehicle-extra-row{grid-template-columns:1fr}
   .rdks-type{min-width:0;width:100%;max-width:none}
   .horizontal-options{flex-wrap:wrap}
   .detail{grid-template-columns:1fr 1fr}
@@ -1351,26 +1347,6 @@ body:not(.authenticated) .page{display:none}
                     <option value="Kleinwagen">Kleinwagen</option>
                   </select>
                 </div>
-                <div class="field full">
-                  <div class="tire-construction-row vehicle-extra-row">
-                    <div class="field">
-                      <label>Anbaumaterial</label>
-                      <div class="seasons horizontal-options" id="mountingOptions">
-                        <label><input type="radio" name="mounting" value="Mit eingelagert"> Mit eingelagert</label>
-                        <label><input type="radio" name="mounting" value="Im Fahrzeug"> Im Fahrzeug</label>
-                        <label><input type="radio" name="mounting" value="Serie"> Serie</label>
-                      </div>
-                    </div>
-                    <div class="field">
-                      <label>Radabdeckung</label>
-                      <label class="wash-toggle">
-                        <input id="wheelCoverStored" type="checkbox">
-                        <span class="wash-box"></span>
-                        <span>Mit eingelagert</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1388,7 +1364,7 @@ body:not(.authenticated) .page{display:none}
               <label><input type="radio" name="season" value="Winterreifen"> Winterreifen</label>
               <label><input type="radio" name="season" value="Ganzjahresreifen"> Ganzjahresreifen</label>
             </div>
-            <div class="season-switch-hint">Mit der Auswahl wechselst du zwischen den gespeicherten Reifensätzen des Kunden. Jeder Reifensatz kann eigene Größe, Hersteller, Stückzahl, Ausführung, Felgenart und Profiltiefen haben.</div>
+            <div class="season-switch-hint">Mit der Auswahl wechselst du zwischen den gespeicherten Reifensätzen des Kunden. Jeder Reifensatz kann eigene Größe, Hersteller, Stückzahl, Ausführung, Felgenart, Anbaumaterial, Radabdeckung und Profiltiefen haben.</div>
           </div>
 
           <div class="storage-appointment-row">
@@ -1396,6 +1372,26 @@ body:not(.authenticated) .page{display:none}
               <label for="changeAppointment">Wechseltermin</label>
               <input id="changeAppointment" type="date">
               <div class="season-switch-hint">Der Termin gehört zur aktuell ausgewählten Reifenart. Beim Umstellen auf eine andere Reifenart wird der Termin automatisch gelöscht und kann beim nächsten Wechsel neu eingetragen werden.</div>
+            </div>
+          </div>
+
+          <div class="tire-storage-row">
+            <div class="field">
+              <label>Anbaumaterial</label>
+              <div class="seasons horizontal-options" id="mountingOptions">
+                <label><input type="radio" name="mounting" value="Mit eingelagert"> Mit eingelagert</label>
+                <label><input type="radio" name="mounting" value="Im Fahrzeug"> Im Fahrzeug</label>
+                <label><input type="radio" name="mounting" value="Serie"> Serie</label>
+              </div>
+              <div class="season-switch-hint">Die Auswahl gehört zur aktuell ausgewählten Reifenart.</div>
+            </div>
+            <div class="field">
+              <label>Radabdeckung</label>
+              <label class="wash-toggle">
+                <input id="wheelCoverStored" type="checkbox">
+                <span class="wash-box"></span>
+                <span>Mit eingelagert</span>
+              </label>
             </div>
           </div>
 
@@ -1702,6 +1698,7 @@ function normalizeAppointmentDate(value){
 function blankTireSet(){
   return {
     size:"", brand:"", quantity:"", tireConstruction:"", rimType:"",
+    mounting:"", wheelCoverStored:false,
     wash:false, fl:"", fr:"", rl:"", rr:""
   };
 }
@@ -1713,6 +1710,8 @@ function normalizeTireSet(value){
     quantity: src.quantity ?? "",
     tireConstruction: src.tireConstruction ?? "",
     rimType: src.rimType ?? "",
+    mounting: src.mounting ?? "",
+    wheelCoverStored: !!src.wheelCoverStored,
     wash: !!src.wash,
     fl: src.fl ?? "",
     fr: src.fr ?? "",
@@ -1722,7 +1721,7 @@ function normalizeTireSet(value){
 }
 function hasTireSetData(set){
   const t = normalizeTireSet(set);
-  return [t.size,t.brand,t.quantity,t.tireConstruction,t.rimType,t.fl,t.fr,t.rl,t.rr].some(v => String(v ?? "").trim() !== "") || t.wash;
+  return [t.size,t.brand,t.quantity,t.tireConstruction,t.rimType,t.mounting,t.fl,t.fr,t.rl,t.rr].some(v => String(v ?? "").trim() !== "") || t.wash || t.wheelCoverStored;
 }
 function getCustomerTireSets(c){
   const sets = {};
@@ -1734,6 +1733,14 @@ function getCustomerTireSets(c){
   // Backward compatibility for customers created before multiple tire sets existed.
   if(!Object.keys(sets).length && c && c.season && TIRE_SEASONS.includes(c.season)){
     sets[c.season] = normalizeTireSet(c);
+  }
+  // Older records stored mounting/rad cover at customer level. Migrate those values
+  // to the legacy primary/active tire set only; new records are fully per-season.
+  const legacySeason = c?.storedSeason && sets[c.storedSeason] ? c.storedSeason : (c?.season && sets[c.season] ? c.season : Object.keys(sets)[0]);
+  if(legacySeason && sets[legacySeason]){
+    const t = sets[legacySeason];
+    if(!t.mounting && c?.mounting) t.mounting = c.mounting;
+    if(Object.prototype.hasOwnProperty.call(c || {}, "wheelCoverStored")) t.wheelCoverStored = !!c.wheelCoverStored;
   }
   return sets;
 }
@@ -1755,6 +1762,8 @@ function readTireFields(){
     quantity: $("quantity").value,
     tireConstruction: document.querySelector('input[name="tireConstruction"]:checked')?.value || "",
     rimType: document.querySelector('input[name="rimType"]:checked')?.value || "",
+    mounting: document.querySelector('input[name="mounting"]:checked')?.value || "",
+    wheelCoverStored: $("wheelCoverStored").checked,
     wash: $("wash").checked,
     fl: $("fl").value,
     fr: $("fr").value,
@@ -1769,6 +1778,8 @@ function writeTireFields(data){
   $("quantity").value = t.quantity;
   document.querySelectorAll('input[name="tireConstruction"]').forEach(r => r.checked = r.value === t.tireConstruction);
   document.querySelectorAll('input[name="rimType"]').forEach(r => r.checked = r.value === t.rimType);
+  document.querySelectorAll('input[name="mounting"]').forEach(r => r.checked = r.value === t.mounting);
+  $("wheelCoverStored").checked = !!t.wheelCoverStored;
   $("wash").checked = !!t.wash;
   $("fl").value = t.fl;
   $("fr").value = t.fr;
@@ -1781,7 +1792,8 @@ function setTireInputsEnabled(enabled){
     const el = $(id);
     if(el) el.disabled = !enabled;
   });
-  document.querySelectorAll('input[name="tireConstruction"], input[name="rimType"]').forEach(r => r.disabled = !enabled);
+  document.querySelectorAll('input[name="tireConstruction"], input[name="rimType"], input[name="mounting"]').forEach(r => r.disabled = !enabled);
+  $("wheelCoverStored").disabled = !enabled;
 }
 function captureActiveTireSet(){
   if(!activeTireSeason) return;
@@ -2015,20 +2027,18 @@ function printBackup(){
     if(!seasons.length){
       return `<div class="backup-empty">Keine Reifendaten hinterlegt.</div>`;
     }
-    return `<table class="backup-tire-table"><colgroup><col style="width:21%"><col style="width:28%"><col style="width:10%"><col style="width:23%"><col style="width:18%"></colgroup><thead><tr><th>Reifenart</th><th>Reifengröße</th><th>Stück</th><th>Reifenausführung</th><th>Reifen gewaschen</th></tr></thead><tbody>${seasons.map(season=>{
+    return `<table class="backup-tire-table"><colgroup><col style="width:17%"><col style="width:21%"><col style="width:8%"><col style="width:17%"><col style="width:18%"><col style="width:9%"><col style="width:10%"></colgroup><thead><tr><th>Reifenart</th><th>Reifengröße</th><th>Stück</th><th>Reifenausführung</th><th>Anbaumaterial</th><th>Radabdeckung</th><th>Gewaschen</th></tr></thead><tbody>${seasons.map(season=>{
       const t=normalizeTireSet(sets[season]);
-      return `<tr><td><strong>${esc(season)}</strong></td><td>${printText(t.size)}</td><td>${printText(t.quantity)}</td><td>${printText(t.tireConstruction)}</td><td>${t.wash ? "Ja" : "Nein"}</td></tr>`;
+      return `<tr><td><strong>${esc(season)}</strong></td><td>${printText(t.size)}</td><td>${printText(t.quantity)}</td><td>${printText(t.tireConstruction)}</td><td>${printText(t.mounting)}</td><td>${t.wheelCoverStored ? "Ja" : "Nein"}</td><td>${t.wash ? "Ja" : "Nein"}</td></tr>`;
     }).join("")}</tbody></table>`;
   };
 
   const customerBlocks = list.map(c => `<section class="backup-customer">
     <div class="backup-customer-head"><div class="backup-customer-name">${printText(`${c.firstName || ""} ${c.lastName || ""}`.trim())}</div><div class="backup-customer-plate">Kennzeichen: ${printText(c.licensePlate)}</div></div>
     <div class="backup-info-grid">
-      <div class="backup-info-item"><label>Anbaumaterial</label><div class="backup-info-value">${printText(c.mounting)}</div></div>
-      <div class="backup-info-item"><label>Radabdeckung</label><div class="backup-info-value">${c.wheelCoverStored ? "Ja" : "Nein"}</div></div>
       <div class="backup-info-item"><label>Lagerplatz</label><div class="backup-info-value">${printText(c.storage)}</div></div>
     </div>
-    <div class="backup-tires-title">Reifendaten</div>
+    <div class="backup-tires-title">Reifendaten je Reifensatz</div>
     ${tireRows(c)}
   </section>`).join("");
 
@@ -2084,12 +2094,12 @@ function printCustomer(id){
   };
   const tireBlocks=seasonsToPrint.map(season=>{
     const t=sets[season] || blankTireSet();
-    return `<div class="print-tire-set"><div class="print-grid-full"><div class="field"><label>Reifenart</label><div class="print-value tire-season-print-value"><strong>${esc(season || "Reifenart nicht angegeben")}</strong></div></div></div><div class="print-grid-2" style="margin-top:8px"><div class="field"><label>Reifengröße ${t.size?"":'<span class="required-star">*</span>'}</label><div class="print-value ${t.size?"":"missing"}">${printText(t.size)}</div></div><div class="field"><label>Hersteller / Fabrikat</label><div class="print-value">${printText(t.brand)}</div></div></div><div class="print-grid-3" style="margin-top:10px"><div class="field"><label>Stück</label><div class="print-value">${printText(t.quantity)}</div></div><div class="field"><label>Reifenausführung ${t.tireConstruction?"":'<span class="required-star">*</span>'}</label><div class="print-value ${t.tireConstruction?"":"missing"}">${printText(t.tireConstruction)}</div></div><div class="field"><label>Felgenart</label><div class="print-value">${printText(rimLabel(t))}</div></div></div><div class="print-grid-full" style="margin-top:10px"><div class="field"><label>RDKS</label><div class="print-value">${c.rdks?("✓ Ja" + (c.rdksType ? " – " + esc(c.rdksType) : "")):"Nein"}</div></div><div class="field"><label>Waschen</label><div class="print-value">${t.wash?"✓ Waschen":"Nein"}</div></div><div class="field"><label>Lagerplatz</label><div class="print-value">${printText(c.storage)}</div></div></div><div class="section-label print-profile-title">Profiltiefe am Fahrzeug</div><div class="print-grid-4 tread-print-grid"><div class="field"><label>Vorne links</label><div class="print-value">${t.fl!==""&&t.fl!=null?esc(t.fl)+" mm":"—"}</div></div><div class="field"><label>Vorne rechts</label><div class="print-value">${t.fr!==""&&t.fr!=null?esc(t.fr)+" mm":"—"}</div></div><div class="field"><label>Hinten links</label><div class="print-value">${t.rl!==""&&t.rl!=null?esc(t.rl)+" mm":"—"}</div></div><div class="field"><label>Hinten rechts</label><div class="print-value">${t.rr!==""&&t.rr!=null?esc(t.rr)+" mm":"—"}</div></div></div>${lowHtml(season,t)}</div>`;
+    return `<div class="print-tire-set"><div class="print-grid-full"><div class="field"><label>Reifenart</label><div class="print-value tire-season-print-value"><strong>${esc(season || "Reifenart nicht angegeben")}</strong></div></div></div><div class="print-grid-2" style="margin-top:8px"><div class="field"><label>Reifengröße ${t.size?"":'<span class="required-star">*</span>'}</label><div class="print-value ${t.size?"":"missing"}">${printText(t.size)}</div></div><div class="field"><label>Hersteller / Fabrikat</label><div class="print-value">${printText(t.brand)}</div></div></div><div class="print-grid-3" style="margin-top:10px"><div class="field"><label>Stück</label><div class="print-value">${printText(t.quantity)}</div></div><div class="field"><label>Reifenausführung ${t.tireConstruction?"":'<span class="required-star">*</span>'}</label><div class="print-value ${t.tireConstruction?"":"missing"}">${printText(t.tireConstruction)}</div></div><div class="field"><label>Felgenart</label><div class="print-value">${printText(rimLabel(t))}</div></div></div><div class="print-grid-2" style="margin-top:10px"><div class="field"><label>Anbaumaterial</label><div class="print-options">${printOption("Mit eingelagert",t.mounting==="Mit eingelagert")}${printOption("Im Fahrzeug",t.mounting==="Im Fahrzeug")}${printOption("Serie",t.mounting==="Serie")}</div></div><div class="field"><label>Radabdeckung</label><div class="print-value">${t.wheelCoverStored?"✓ Mit eingelagert":"Nicht eingelagert"}</div></div></div><div class="print-grid-full" style="margin-top:10px"><div class="field"><label>RDKS</label><div class="print-value">${c.rdks?("✓ Ja" + (c.rdksType ? " – " + esc(c.rdksType) : "")):"Nein"}</div></div><div class="field"><label>Waschen</label><div class="print-value">${t.wash?"✓ Waschen":"Nein"}</div></div><div class="field"><label>Lagerplatz</label><div class="print-value">${printText(c.storage)}</div></div></div><div class="section-label print-profile-title">Profiltiefe am Fahrzeug</div><div class="print-grid-4 tread-print-grid"><div class="field"><label>Vorne links</label><div class="print-value">${t.fl!==""&&t.fl!=null?esc(t.fl)+" mm":"—"}</div></div><div class="field"><label>Vorne rechts</label><div class="print-value">${t.fr!==""&&t.fr!=null?esc(t.fr)+" mm":"—"}</div></div><div class="field"><label>Hinten links</label><div class="print-value">${t.rl!==""&&t.rl!=null?esc(t.rl)+" mm":"—"}</div></div><div class="field"><label>Hinten rechts</label><div class="print-value">${t.rr!==""&&t.rr!=null?esc(t.rr)+" mm":"—"}</div></div></div>${lowHtml(season,t)}</div>`;
   }).join("");
   $("printSheet").className="";
   $("printSheet").innerHTML=`<div class="print-sheet"><div class="print-like-head"><h2>${printText(c.firstName)} ${printText(c.lastName)}</h2><div class="print-like-date">Kunden-Nr.: <strong>${printText(c.customerNumber)}</strong><br>Erstellt am: <strong>${formatDate(c.createdAt)}</strong></div></div>
   <div class="form-section"><div class="form-section-head"><div class="section-icon">👤</div><h3>Kundendaten</h3></div><div class="form-section-body"><div class="print-grid-3 customer-print-top"><div class="field"><label>Vorname ${c.firstName?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.firstName?"":"missing"}">${printText(c.firstName)}</div></div><div class="field"><label>Nachname ${c.lastName?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.lastName?"":"missing"}">${printText(c.lastName)}</div></div><div class="field"><label>Kunden-Nr.</label><div class="print-value">${printText(c.customerNumber)}</div></div></div><div class="print-grid-full" style="margin-top:8px"><div class="field"><label>Anschrift</label><div class="print-value">${printText(c.address)}</div></div></div><div class="print-grid-2" style="margin-top:8px"><div class="field"><label>Telefon</label><div class="print-value">${printText(c.phone)}</div></div><div class="field"><label>E-Mail-Adresse</label><div class="print-value">${printText(c.email)}</div></div></div></div></div>
-  <div class="form-section"><div class="form-section-head"><div class="section-icon">🚗</div><h3>Fahrzeugdaten</h3></div><div class="form-section-body"><div class="print-grid-2"><div class="field"><label>Kfz-Kennzeichen ${c.licensePlate?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.licensePlate?"":"missing"}">${printText(c.licensePlate)}</div></div><div class="field"><label>Kilometerstand</label><div class="print-value">${c.mileage?esc(c.mileage)+" km":"—"}</div></div></div><div class="print-grid-3" style="margin-top:10px"><div class="field"><label>Fahrzeughersteller</label><div class="print-value">${printText(c.vehicleManufacturer)}</div></div><div class="field"><label>Fahrzeugtyp / Modell</label><div class="print-value">${printText(c.vehicleModel)}</div></div><div class="field"><label>PKW-Art / Fahrzeugklasse</label><div class="print-value">${printText(c.vehicleType)}</div></div></div><div class="print-grid-full" style="margin-top:10px"><div class="field"><label>Anbaumaterial</label><div class="print-options">${printOption("Mit eingelagert",c.mounting==="Mit eingelagert")}${printOption("Im Fahrzeug",c.mounting==="Im Fahrzeug")}${printOption("Serie",c.mounting==="Serie")}</div></div><div class="field"><label>Radabdeckungen</label><div class="print-value">${c.wheelCoverStored?"✓ Mit eingelagert":"Nicht eingelagert"}</div></div></div></div></div>
+  <div class="form-section"><div class="form-section-head"><div class="section-icon">🚗</div><h3>Fahrzeugdaten</h3></div><div class="form-section-body"><div class="print-grid-2"><div class="field"><label>Kfz-Kennzeichen ${c.licensePlate?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.licensePlate?"":"missing"}">${printText(c.licensePlate)}</div></div><div class="field"><label>Kilometerstand</label><div class="print-value">${c.mileage?esc(c.mileage)+" km":"—"}</div></div></div><div class="print-grid-3" style="margin-top:10px"><div class="field"><label>Fahrzeughersteller</label><div class="print-value">${printText(c.vehicleManufacturer)}</div></div><div class="field"><label>Fahrzeugtyp / Modell</label><div class="print-value">${printText(c.vehicleModel)}</div></div><div class="field"><label>PKW-Art / Fahrzeugklasse</label><div class="print-value">${printText(c.vehicleType)}</div></div></div></div></div>
   <div class="form-section"><div class="form-section-head"><div class="section-icon">🛞</div><h3>Reifendaten</h3></div><div class="form-section-body">${tireBlocks}</div></div>
   <div class="form-section"><div class="form-section-head"><div class="section-icon">📝</div><h3>Bemerkungen</h3></div><div class="form-section-body"><div class="print-value note-value">${printText(c.notes)}</div></div></div>
   ${missing.length?`<div class="print-missing-note">⚠ Angaben noch nicht vollständig. Fehlt: ${missing.map(esc).join(", ")}</div>`:""}
@@ -2176,8 +2186,6 @@ function openCustomer(id){
   $("vehicleType").value=c.vehicleType||"";
   $("vehicleManufacturer").value=c.vehicleManufacturer||"";
   $("vehicleModel").value=c.vehicleModel||"";
-  document.querySelectorAll('input[name="mounting"]').forEach(r=>r.checked=r.value===(c.mounting||""));
-  $("wheelCoverStored").checked=!!c.wheelCoverStored;
   $("rdks").checked=!!c.rdks;
   setRdksMethod(c.rdksType||"");
   updateRdksTypeVisibility();
@@ -2243,7 +2251,8 @@ document.querySelectorAll('input[name="season"]').forEach(r=>r.addEventListener(
 }));
 document.querySelectorAll('input[name="tireConstruction"]').forEach(r=>r.addEventListener("change",()=>{updateRimTypeField();updateCompletenessNotice();}));
 ["size","brand","quantity","wash","fl","fr","rl","rr"].forEach(id=>$(id).addEventListener("input",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
-document.querySelectorAll('input[name="tireConstruction"],input[name="rimType"]').forEach(r=>r.addEventListener("change",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
+document.querySelectorAll('input[name="tireConstruction"],input[name="rimType"],input[name="mounting"]').forEach(r=>r.addEventListener("change",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
+$("wheelCoverStored").addEventListener("change",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();});
 
 $("rdks").addEventListener("change",updateRdksTypeVisibility);
 document.querySelectorAll(".rdks-method").forEach(cb=>cb.addEventListener("change",()=>handleRdksMethodChange(cb)));
@@ -2259,7 +2268,7 @@ $("customerForm").addEventListener("submit",async e=>{
   const item={
     id:editingId||uid(),
     customerNumber:$("customerNumber").value.trim().toUpperCase(),
-    firstName:$("firstName").value.trim(),lastName:$("lastName").value.trim(),address:$("address").value.trim(),phone:$("phone").value.trim(),email:$("email").value.trim(),storage:$("storage").value.trim(),licensePlate:$("licensePlate").value.trim().toUpperCase(),mileage:$("mileage").value.trim(),vehicleType:$("vehicleType").value,vehicleManufacturer:$("vehicleManufacturer").value.trim(),vehicleModel:$("vehicleModel").value.trim(),mounting:document.querySelector('input[name="mounting"]:checked')?.value||"",wheelCoverStored:$("wheelCoverStored").checked,rdks:$("rdks").checked,rdksType:$("rdks").checked?$("rdksType").value:"",
+    firstName:$("firstName").value.trim(),lastName:$("lastName").value.trim(),address:$("address").value.trim(),phone:$("phone").value.trim(),email:$("email").value.trim(),storage:$("storage").value.trim(),licensePlate:$("licensePlate").value.trim().toUpperCase(),mileage:$("mileage").value.trim(),vehicleType:$("vehicleType").value,vehicleManufacturer:$("vehicleManufacturer").value.trim(),vehicleModel:$("vehicleModel").value.trim(),rdks:$("rdks").checked,rdksType:$("rdks").checked?$("rdksType").value:"",
     tireSets, tireConstruction:primary.tireConstruction,rimType:primary.rimType,quantity:primary.quantity,brand:primary.brand,size:primary.size,season:primarySeason,storedSeason:(activeTireSeason||primarySeason),changeAppointment:$("changeAppointment").value||"",fl:primary.fl,fr:primary.fr,rl:primary.rl,rr:primary.rr,wash:primary.wash,
     notes:$("notes").value.trim(),createdAt:$("createdDisplay").value||todayISO()
   };
