@@ -185,8 +185,8 @@ h1{margin:0;font-size:30px;letter-spacing:-.03em}
   padding:16px 22px;display:grid;grid-template-columns:1fr 1fr 210px minmax(330px,1fr) auto;gap:12px;
   border-bottom:1px solid var(--line)
 }
- .tire-size-builder{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;min-width:0}
-.tire-size-brand-row{display:flex;align-items:flex-end;gap:20px;flex-wrap:nowrap;min-width:0}.tire-brand-inline{width:245px;min-width:220px}.tire-brand-inline input{height:44px}.second-size-field .tire-brand-inline{margin:0}@media(max-width:700px){.tire-size-brand-row{gap:12px;overflow-x:auto;padding-bottom:2px}.tire-brand-inline{width:190px;min-width:190px}.tire-brand-inline input{height:42px;font-size:15px}.second-size-field{overflow:hidden}}
+ .tire-size-builder{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;min-width:0;flex:0 0 auto}.tire-size-builder select,.tire-size-builder input{flex:0 0 auto}
+.tire-size-brand-row{display:flex;align-items:flex-end;gap:26px;flex-wrap:nowrap;min-width:0}.tire-brand-inline{width:270px;min-width:240px;flex:0 0 270px}.tire-brand-inline input{height:44px}.second-size-field .tire-brand-inline{margin:0}@media(max-width:700px){.tire-size-brand-row{gap:14px;overflow-x:auto;padding-bottom:2px}.tire-brand-inline{width:200px;min-width:200px;flex-basis:200px}.tire-brand-inline input{height:42px;font-size:15px}.second-size-field{overflow:hidden}}
 .tire-size-builder select,.tire-size-builder input{height:44px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;padding:0 10px;font:inherit;color:#1f2937;box-sizing:border-box}
 #sizeWidth{width:108px}.tire-size-builder span{font-weight:800;color:#334155}.tire-size-builder #sizeAspect{width:96px}.tire-size-builder #sizeRim{width:90px}.tire-size-builder #sizeSuffix{width:112px}
 #size2Width{width:108px}.tire-size-builder #size2Aspect{width:96px}.tire-size-builder #size2Rim{width:90px}.tire-size-builder #size2Suffix{width:112px}
@@ -194,7 +194,7 @@ h1{margin:0;font-size:30px;letter-spacing:-.03em}
 .second-size-field .tire-size-builder{gap:8px}
 @media(max-width:700px){.second-size-field .tire-size-brand-row{gap:12px}.second-size-field .tire-brand-inline{width:190px;min-width:190px}}
 
-@media(max-width:700px){.tire-size-builder{gap:5px}.tire-size-builder select,.tire-size-builder input{height:42px;padding:0 7px;font-size:15px}.tire-size-builder #sizeWidth,.tire-size-builder #size2Width{width:108px}.tire-size-builder #sizeAspect,.tire-size-builder #size2Aspect{width:96px}.tire-size-builder #sizeRim,.tire-size-builder #size2Rim{width:90px}.tire-size-builder #sizeSuffix,.tire-size-builder #size2Suffix{width:112px}}
+@media(max-width:700px){.tire-size-builder{gap:5px}.tire-size-builder select,.tire-size-builder input{height:42px;padding:0 7px;font-size:15px;flex:0 0 auto}.tire-size-builder #sizeWidth,.tire-size-builder #size2Width{width:108px}.tire-size-builder #sizeAspect,.tire-size-builder #size2Aspect{width:96px}.tire-size-builder #sizeRim,.tire-size-builder #size2Rim{width:90px}.tire-size-builder #sizeSuffix,.tire-size-builder #size2Suffix{width:112px}}
 .field{display:flex;flex-direction:column;gap:6px}
 .status-filter{
   display:none;
