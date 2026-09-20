@@ -337,7 +337,14 @@ input:focus,select:focus,textarea:focus{
 .tablewrap{overflow:auto}
 table{border-collapse:collapse;width:100%;min-width:760px}
 th,td{padding:14px 18px;text-align:left !important;border-bottom:1px solid var(--line);vertical-align:middle}
-th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:#fbfcfd}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:#fbfcfd;position:relative}
+th.resizable-header{padding-right:22px}
+.column-resizer{position:absolute;top:0;right:-3px;width:8px;height:100%;cursor:col-resize;touch-action:none;z-index:5}
+.column-resizer::after{content:"";position:absolute;top:25%;bottom:25%;left:3px;width:2px;border-radius:2px;background:#d5dce5;transition:.12s}
+th:hover .column-resizer::after,.column-resizer.dragging::after{background:var(--accent);width:3px}
+body.is-resizing-columns{cursor:col-resize !important;user-select:none}
+body.is-resizing-columns *{cursor:col-resize !important}
+.column-width-hint{margin-left:8px;font-size:10px;font-weight:700;color:#94a0ae;text-transform:none;letter-spacing:0}
 td{font-size:14px}
 tbody tr{cursor:pointer;transition:.12s background}
 tbody tr:hover{background:#f8faff}
@@ -1278,16 +1285,6 @@ body:not(.authenticated) .page{display:none}
   th,td{padding:10px 7px}
   th{font-size:9px;line-height:1.2}
   td{font-size:12px;line-height:1.25}
-  th:nth-child(1),td:nth-child(1){width:6%}
-  th:nth-child(2),td:nth-child(2){width:17%}
-  th:nth-child(3),td:nth-child(3){width:12%;min-width:112px}
-  th:nth-child(4),td:nth-child(4){width:10%}
-  th:nth-child(5),td:nth-child(5){width:8%}
-  th:nth-child(6),td:nth-child(6){width:17%}
-  th:nth-child(7),td:nth-child(7){width:8%}
-  th:nth-child(8),td:nth-child(8){width:8%}
-  th:nth-child(9),td:nth-child(9){width:9%}
-  th:nth-child(10),td:nth-child(10){width:7%}
   .plate-pill{white-space:nowrap;display:inline-flex;align-items:center;max-width:100%;}
   .tire-brand,.tire-size,.tire-season-pill{white-space:normal}
   .tire-brand{font-size:10px}
@@ -1520,19 +1517,22 @@ body:not(.authenticated) .page{display:none}
     <div class="order-summary" id="orderSummary"></div>
 
     <div class="tablewrap">
-      <table>
+      <table id="customerTable">
+        <colgroup id="customerColgroup">
+          <col data-col="0"><col data-col="1"><col data-col="2"><col data-col="3"><col data-col="4"><col data-col="5"><col data-col="6"><col data-col="7"><col data-col="8"><col data-col="9">
+        </colgroup>
         <thead>
           <tr>
-            <th>Kunden-Nr.</th>
-            <th>Kunde</th>
-            <th>Kfz-Kennzeichen</th>
-            <th>Reifenart</th>
-            <th>PKW-Art</th>
-            <th>Hersteller / Größe</th>
-            <th>Lagerplatz</th>
-            <th>Wechseltermin</th>
-            <th>Reifenstatus</th>
-            <th></th>
+            <th data-col="0">Kunden-Nr.<span class="column-resizer" aria-label="Spaltenbreite ändern"></span></th>
+            <th data-col="1">Kunde<span class="column-resizer" aria-label="Spaltenbreite ändern"></span></th>
+            <th data-col="2">Kfz-Kennzeichen<span class="column-resizer" aria-label="Spaltenbreite ändern"></span></th>
+            <th data-col="3">Reifenart<span class="column-resizer" aria-label="Spaltenbreite ändern"></span></th>
+            <th data-col="4">PKW-Art<span class="column-resizer" aria-label="Spaltenbreite ändern"></span></th>
+            <th data-col="5">Hersteller / Größe<span class="column-resizer" aria-label="Spaltenbreite ändern"></span></th>
+            <th data-col="6">Lagerplatz<span class="column-resizer" aria-label="Spaltenbreite ändern"></span></th>
+            <th data-col="7">Wechseltermin<span class="column-resizer" aria-label="Spaltenbreite ändern"></span></th>
+            <th data-col="8">Reifenstatus<span class="column-resizer" aria-label="Spaltenbreite ändern"></span></th>
+            <th data-col="9"></th>
           </tr>
         </thead>
         <tbody id="customerList"></tbody>
@@ -2332,6 +2332,110 @@ function getDisplayedCustomers(){
   }
   return list;
 }
+const CUSTOMER_COLUMN_DEFAULTS = [
+  92, 210, 125, 145, 110, 210, 125, 130, 145, 72
+];
+const CUSTOMER_COLUMN_MIN = [70, 125, 105, 105, 80, 130, 80, 105, 105, 62];
+const CUSTOMER_COLUMN_STORAGE_KEY = "reifenservice_customer_column_widths_v1";
+
+function customerColumnIsResizable(){
+  return window.matchMedia("(min-width:701px)").matches;
+}
+
+function getSavedCustomerColumnWidths(){
+  try{
+    const raw = localStorage.getItem(CUSTOMER_COLUMN_STORAGE_KEY);
+    const values = JSON.parse(raw || "null");
+    if(Array.isArray(values) && values.length === 10 && values.every(v => Number.isFinite(Number(v)))){
+      return values.map(Number);
+    }
+  }catch(e){}
+  return null;
+}
+
+function saveCustomerColumnWidths(widths){
+  try{ localStorage.setItem(CUSTOMER_COLUMN_STORAGE_KEY, JSON.stringify(widths)); }catch(e){}
+}
+
+function applyCustomerColumnWidths(widths){
+  const table = $("customerTable");
+  const cols = table?.querySelectorAll("#customerColgroup col");
+  if(!table || !cols || cols.length !== 10) return;
+  cols.forEach((col,i) => col.style.width = `${Math.max(CUSTOMER_COLUMN_MIN[i], Number(widths[i]) || CUSTOMER_COLUMN_DEFAULTS[i])}px`);
+}
+
+function initializeCustomerColumnResizers(force=false){
+  const table = $("customerTable");
+  if(!table) return;
+  const handles = table.querySelectorAll(".column-resizer");
+  if(!handles.length) return;
+
+  if(!force && table.dataset.resizersReady === "1") return;
+  table.dataset.resizersReady = "1";
+
+  // On the first load, use the current visual widths so the existing iPad/desktop layout is preserved.
+  let widths = getSavedCustomerColumnWidths();
+  if(!widths){
+    widths = [...table.querySelectorAll("thead th")].map(th => Math.round(th.getBoundingClientRect().width));
+    if(widths.length !== 10 || widths.some(w => !w || w < 20)) widths = [...CUSTOMER_COLUMN_DEFAULTS];
+    widths = widths.map((w,i) => Math.max(CUSTOMER_COLUMN_MIN[i], w));
+    // Normalize to the actual table width, while keeping the minimums.
+    const tableWidth = table.getBoundingClientRect().width;
+    const sum = widths.reduce((a,b)=>a+b,0);
+    if(tableWidth > 0 && sum > 0){
+      const factor = tableWidth / sum;
+      widths = widths.map((w,i)=>Math.max(CUSTOMER_COLUMN_MIN[i], Math.round(w * factor)));
+    }
+  }
+  applyCustomerColumnWidths(widths);
+
+  handles.forEach(handle => {
+    handle.addEventListener("pointerdown", e => {
+      if(!customerColumnIsResizable()) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const th = handle.closest("th");
+      const colIndex = Number(th?.dataset.col);
+      if(!Number.isInteger(colIndex) || colIndex < 0 || colIndex > 9) return;
+
+      const cols = [...table.querySelectorAll("#customerColgroup col")];
+      const rects = cols.map(col => col.getBoundingClientRect());
+      const startWidths = rects.map(r => r.width);
+      const neighbor = colIndex < 9 ? colIndex + 1 : colIndex - 1;
+      const startX = e.clientX;
+      const direction = colIndex < 9 ? 1 : -1;
+      const minCurrent = CUSTOMER_COLUMN_MIN[colIndex];
+      const minNeighbor = CUSTOMER_COLUMN_MIN[neighbor];
+      handle.classList.add("dragging");
+      document.body.classList.add("is-resizing-columns");
+      try{ handle.setPointerCapture(e.pointerId); }catch(err){}
+
+      const move = ev => {
+        const rawDelta = (ev.clientX - startX) * direction;
+        const maxDelta = startWidths[neighbor] - minNeighbor;
+        const minDelta = minCurrent - startWidths[colIndex];
+        const delta = Math.max(minDelta, Math.min(maxDelta, rawDelta));
+        const next = [...startWidths];
+        next[colIndex] = startWidths[colIndex] + delta;
+        next[neighbor] = startWidths[neighbor] - delta;
+        applyCustomerColumnWidths(next);
+      };
+      const finish = () => {
+        handle.classList.remove("dragging");
+        document.body.classList.remove("is-resizing-columns");
+        const finalWidths = [...table.querySelectorAll("#customerColgroup col")].map(col => col.getBoundingClientRect().width);
+        saveCustomerColumnWidths(finalWidths);
+        handle.removeEventListener("pointermove", move);
+        handle.removeEventListener("pointerup", finish);
+        handle.removeEventListener("pointercancel", finish);
+      };
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", finish);
+      handle.addEventListener("pointercancel", finish);
+    });
+  });
+}
+
 function render(){
   const list = getDisplayedCustomers();
   const displaySeason = $("sort").value === "status" ? $("statusSeason").value : "";
@@ -2354,6 +2458,7 @@ function render(){
     </tr>`;
   }).join("");
   $("empty").style.display = list.length ? "none" : "block";
+  initializeCustomerColumnResizers();
   $("customerList").querySelectorAll("tr[data-id]").forEach(tr=>tr.addEventListener("click",e=>{ if(e.target.closest("button")) return; openCustomer(tr.dataset.id); }));
   $("customerList").querySelectorAll(".pdfBtn").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();printCustomer(btn.dataset.id);}));
 }
@@ -2740,6 +2845,9 @@ async function initApp(){
 }
 
 supabaseClient = null;
+window.addEventListener("resize", () => {
+  if(customerColumnIsResizable()) initializeCustomerColumnResizers();
+});
 initApp();
 </script>
 </body>
