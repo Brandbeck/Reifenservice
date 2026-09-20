@@ -624,6 +624,100 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin:18px 0 30px}
   }
 }
 
+/* Druckansicht Kundensicherung */
+@page backupPortrait{
+  size:A4 portrait;
+  margin:10mm;
+}
+body.printing-backup .page,
+body.printing-backup .modal{
+  display:none !important;
+}
+body.printing-backup #printSheet{
+  display:block !important;
+}
+#printSheet.backup-mode{
+  page:backupPortrait;
+  width:190mm;
+  color:#172033;
+  background:#fff;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.backup-print-sheet{
+  width:190mm;
+  color:#172033;
+  background:#fff;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.backup-print-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:0 0 8px;
+  margin-bottom:10px;
+  border-bottom:2px solid #172033;
+}
+.backup-print-head h2{margin:0;font-size:18px;font-weight:900}
+.backup-print-subtitle{margin-top:3px;font-size:9.5px;color:#687588}
+.backup-print-meta{text-align:right;font-size:9.5px;color:#687588;line-height:1.45}
+.backup-customer{
+  padding:0 0 9px;
+  margin:0 0 9px;
+  border-bottom:1px solid #d9e0e8;
+  break-inside:avoid;
+}
+.backup-customer:last-child{border-bottom:0;margin-bottom:0}
+.backup-customer-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:12px;
+  margin-bottom:6px;
+}
+.backup-customer-name{font-size:12px;font-weight:900}
+.backup-customer-plate{font-size:10px;font-weight:800;color:#44515e;white-space:nowrap}
+.backup-info-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px 14px;
+  margin-bottom:7px;
+}
+.backup-info-item label,
+.backup-tires-title{
+  display:block;
+  margin:0 0 2px;
+  font-size:7.5px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:#687588;
+}
+.backup-info-value{
+  min-height:17px;
+  padding:2px 0 3px;
+  border-bottom:1px solid #dfe4ea;
+  font-size:9.2px;
+  font-weight:700;
+}
+.backup-tires-title{margin-top:6px;margin-bottom:3px}
+.backup-tire-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.backup-tire-table th,
+.backup-tire-table td{
+  padding:4px 5px;
+  border-bottom:1px solid #e3e7ec;
+  text-align:left;
+}
+.backup-tire-table th{
+  font-size:7.4px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  color:#687588;
+  background:#f7f9fb;
+}
+.backup-tire-table td{font-size:8.8px;line-height:1.25;vertical-align:top}
+.backup-tire-table tr:last-child td{border-bottom:0}
+.backup-empty{font-size:8.8px;color:#687588;padding:4px 0}
+
 /* Druckansicht / Listenexport */
 @page listLandscape{
   size:A4 landscape;
@@ -1076,6 +1170,7 @@ body:not(.authenticated) .page{display:none}
         <p>Jeder Kunde wird als eigener Eintrag geführt.</p>
       </div>
       <div class="actions">
+        <button class="btn secondary" id="backupBtn">Sicherung</button>
         <button class="btn primary" id="addBtn">＋ Kunde hinzufügen</button>
       </div>
     </div>
@@ -1902,6 +1997,50 @@ function render(){
 }
 function printText(value){ return value === undefined || value === null || String(value).trim() === "" ? "—" : esc(value); }
 function printOption(value, selected){ return `<span class="print-option ${selected ? "selected" : ""}">${selected ? "●" : "○"} ${esc(value)}</span>`; }
+function printBackup(){
+  if(!customers.length){
+    alert("Es sind keine Kundendaten für die Sicherung vorhanden.");
+    return;
+  }
+
+  const list = [...customers].sort((a,b) => {
+    const na = `${a.lastName || ""} ${a.firstName || ""}`.trim();
+    const nb = `${b.lastName || ""} ${b.firstName || ""}`.trim();
+    return na.localeCompare(nb,"de",{sensitivity:"base"});
+  });
+
+  const tireRows = c => {
+    const sets = getCustomerTireSets(c);
+    const seasons = TIRE_SEASONS.filter(season => sets[season]);
+    if(!seasons.length){
+      return `<div class="backup-empty">Keine Reifendaten hinterlegt.</div>`;
+    }
+    return `<table class="backup-tire-table"><colgroup><col style="width:21%"><col style="width:28%"><col style="width:10%"><col style="width:23%"><col style="width:18%"></colgroup><thead><tr><th>Reifenart</th><th>Reifengröße</th><th>Stück</th><th>Reifenausführung</th><th>Reifen gewaschen</th></tr></thead><tbody>${seasons.map(season=>{
+      const t=normalizeTireSet(sets[season]);
+      return `<tr><td><strong>${esc(season)}</strong></td><td>${printText(t.size)}</td><td>${printText(t.quantity)}</td><td>${printText(t.tireConstruction)}</td><td>${t.wash ? "Ja" : "Nein"}</td></tr>`;
+    }).join("")}</tbody></table>`;
+  };
+
+  const customerBlocks = list.map(c => `<section class="backup-customer">
+    <div class="backup-customer-head"><div class="backup-customer-name">${printText(`${c.firstName || ""} ${c.lastName || ""}`.trim())}</div><div class="backup-customer-plate">Kennzeichen: ${printText(c.licensePlate)}</div></div>
+    <div class="backup-info-grid">
+      <div class="backup-info-item"><label>Anbaumaterial</label><div class="backup-info-value">${printText(c.mounting)}</div></div>
+      <div class="backup-info-item"><label>Radabdeckung</label><div class="backup-info-value">${c.wheelCoverStored ? "Ja" : "Nein"}</div></div>
+      <div class="backup-info-item"><label>Lagerplatz</label><div class="backup-info-value">${printText(c.storage)}</div></div>
+    </div>
+    <div class="backup-tires-title">Reifendaten</div>
+    ${tireRows(c)}
+  </section>`).join("");
+
+  $("printSheet").className="backup-mode";
+  $("printSheet").innerHTML = `<div class="backup-print-sheet">
+    <div class="backup-print-head"><div><h2>Reifenservice – Kundensicherung</h2><div class="backup-print-subtitle">Wichtige Kundendaten für alle ${list.length} ${list.length===1?"Kunden":"Kunden"}</div></div><div class="backup-print-meta">Erstellt am: ${formatDate(todayISO())}</div></div>
+    ${customerBlocks}
+  </div>`;
+  document.body.classList.add("printing-backup");
+  setTimeout(()=>window.print(),80);
+}
+
 function printCustomerList(){
   const list = getDisplayedCustomers();
   if(!list.length){ alert("Es sind aktuell keine Kunden in der angezeigten Liste vorhanden."); return; }
@@ -2072,6 +2211,7 @@ $("statusSeason").onchange=render;
 $("statusFilterValue").onchange=render;
 $("statusSize").onchange=render;
 $("printListBtn").onclick=printCustomerList;
+$("backupBtn").onclick=printBackup;
 updateStatusFilterVisibility();
 $("modal").addEventListener("click",e=>{if(e.target.id==="modal") closeModal();});
 $("firstName").addEventListener("input",updateCompletenessNotice);
@@ -2144,7 +2284,7 @@ $("deleteBtn").onclick = async () => {
 };
 
 window.addEventListener("afterprint", () => {
-  document.body.classList.remove("printing", "printing-list");
+  document.body.classList.remove("printing", "printing-list", "printing-backup");
   $("printSheet").className = "";
   $("printSheet").innerHTML = "";
   // Export aus der Übersicht öffnet kein Kundenfenster dauerhaft.
