@@ -2034,9 +2034,21 @@ function printBackup(){
   }
 
   const list = [...customers].sort((a,b) => {
-    const na = `${a.lastName || ""} ${a.firstName || ""}`.trim();
-    const nb = `${b.lastName || ""} ${b.firstName || ""}`.trim();
-    return na.localeCompare(nb,"de",{sensitivity:"base"});
+    const lastA = String(a.lastName || "").trim();
+    const lastB = String(b.lastName || "").trim();
+    const cmpLast = lastA.localeCompare(lastB, "de-DE", { sensitivity: "base", numeric: true });
+    if (cmpLast !== 0) return cmpLast;
+
+    const firstA = String(a.firstName || "").trim();
+    const firstB = String(b.firstName || "").trim();
+    const cmpFirst = firstA.localeCompare(firstB, "de-DE", { sensitivity: "base", numeric: true });
+    if (cmpFirst !== 0) return cmpFirst;
+
+    return String(a.customerNumber || "").localeCompare(
+      String(b.customerNumber || ""),
+      "de-DE",
+      { numeric: true, sensitivity: "base" }
+    );
   });
 
   const tireRows = c => {
