@@ -2444,13 +2444,13 @@ function tireStatus(c, season){
   const t = getTireSet(c, useSeason);
   if(!t || !useSeason) return '<span class="status-missing">—</span>';
   const positions = [["Vorne links", t.fl],["Vorne rechts", t.fr],["Hinten links", t.rl],["Hinten rechts", t.rr]];
-  // Ein Reifenstatus wird erst angezeigt, wenn für alle vier Positionen eine Profiltiefe hinterlegt ist.
+  // Wenn keine Profiltiefe eingetragen ist, wird der Satz als OK angezeigt.
   const complete = positions.every(([,value]) => {
     if(value === "" || value === null || value === undefined) return false;
     const mm = Number(String(value).replace(",", "."));
     return !Number.isNaN(mm);
   });
-  if(!complete) return '<span class="status-missing">—</span>';
+  if(!complete) return '<span class="status-ok">✓ OK</span>';
   const threshold = useSeason === "Sommerreifen" ? 3 : 4;
   const low = positions.filter(([,value]) => {
     const mm = Number(String(value).replace(",", "."));
@@ -3023,7 +3023,7 @@ function printCustomer(id){
     const positions=[["VL",t.fl,"Vorne links"],["VR",t.fr,"Vorne rechts"],["HL",t.rl,"Hinten links"],["HR",t.rr,"Hinten rechts"]];
     const complete=positions.every(([,v])=>v!==""&&v!==null&&v!==undefined&&!Number.isNaN(Number(String(v).replace(",","."))));
     const low=complete ? positions.filter(([,v])=>{const mm=Number(String(v).replace(",","."));return mm<=threshold;}) : [];
-    const status=!complete ? `<span class="customer-print-status missing">—</span>` : (low.length ? `<span class="customer-print-status warn">⚠ Neue Reifen</span><span class="customer-print-status-detail">${low.map(([,v,label])=>esc(label)).join(", ")}</span>` : `<span class="customer-print-status ok">✓ OK</span>`);
+    const status=!complete ? `<span class="customer-print-status ok">✓ OK</span>` : (low.length ? `<span class="customer-print-status warn">⚠ Neue Reifen</span><span class="customer-print-status-detail">${low.map(([,v,label])=>esc(label)).join(", ")}</span>` : `<span class="customer-print-status ok">✓ OK</span>`);
     return `<div class="customer-print-tire">
       <div class="customer-print-tire-head"><div><span class="customer-print-tire-season">${esc(season || "Reifenart nicht angegeben")}</span><span class="customer-print-tire-sub">${t.quantity ? esc(t.quantity)+" × " : ""}${esc(t.tireConstruction || "")}${rimLabel(t) ? " · "+esc(rimLabel(t)) : ""}</span></div><div class="customer-print-status-wrap">${status}</div></div>
       <div class="customer-print-tire-grid">
