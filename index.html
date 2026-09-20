@@ -1128,7 +1128,6 @@ body:not(.authenticated) .page{display:none}
 
       <div class="actions">
         <button class="btn secondary" id="printListBtn">Liste als PDF exportieren</button>
-        <button class="btn secondary" id="demoBtn">Beispieldaten</button>
       </div>
     </div>
 
@@ -2142,28 +2141,6 @@ $("deleteBtn").onclick = async () => {
   render();
   editingId = null;
   closeModal();
-};
-
-$("demoBtn").onclick = async () => {
-  if(customers.length && !confirm("Beispieldaten zusätzlich anlegen?")) return;
-  const demo = [
-    {
-      id:uid(), customerNumber:"K-10001", firstName:"Max", lastName:"Mustermann", address:"Musterstraße 12, 56068 Koblenz",
-      phone:"0261 123456", storage:"A-12-04", licensePlate:"KO-MM 123", vehicleManufacturer:"Mercedes-Benz", vehicleModel:"A-Klasse", brand:"Michelin", size:"225/45 R17 94W",
-      season:"Sommerreifen", mileage:"84250", vehicleType:"SUV", mounting:"Mit eingelagert", wash:true,
-      fl:"7,2", fr:"7,0", rl:"6,8", rr:"6,9",
-      notes:"Keine Auffälligkeiten.", createdAt:Date.now()
-    },
-    {
-      id:uid(), customerNumber:"K-10002", firstName:"Erika", lastName:"Beispiel", address:"Beispielweg 7, 56070 Koblenz",
-      phone:"0176 12345678", storage:"B-04-11", licensePlate:"MY-BE 456", vehicleManufacturer:"BMW", vehicleModel:"3er", brand:"Continental", size:"205/55 R16 91V",
-      season:"Winterreifen", mileage:"126400", vehicleType:"Kleinwagen", mounting:"Im Fahrzeug", wash:false,
-      fl:"6,4", fr:"6,3", rl:"5,9", rr:"6,0",
-      notes:"Leichter Abrieb an der Vorderachse.", createdAt:Date.now()-1000
-    }
-  ];
-  const ok = await saveAllCustomersToSupabase(demo);
-  if(ok){ customers = customers.concat(demo); render(); }
 };
 
 window.addEventListener("afterprint", () => {
