@@ -254,6 +254,7 @@ h1{margin:0;font-size:30px;letter-spacing:-.03em}
   color:var(--danger);
   font-weight:800;
 }
+.mixed-size-toggle{margin-top:10px}.second-size-field{display:none;margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fafbfd}.second-size-field.show{display:block}.second-size-field>label{display:block;margin-bottom:6px;font-size:12px;font-weight:800;color:#3d4a59}
 .field label{font-size:12px;font-weight:800;color:#3d4a59}
 .field.compact input{width:110px;max-width:100%}
 .form-section{
@@ -1859,6 +1860,25 @@ html,body{overflow-x:hidden;max-width:100vw}
                     <input id="sizeSuffix" aria-label="Tragfähigkeits- und Geschwindigkeitsindex" placeholder="94W">
                   </div>
                   <input id="size" type="hidden" value="">
+                  <div class="mixed-size-toggle">
+                    <label class="wash-toggle">
+                      <input id="mixedTireSize" type="checkbox">
+                      <span class="wash-box"></span>
+                      <span>Mischbereifung / zweite Reifengröße</span>
+                    </label>
+                  </div>
+                  <div id="secondSizeField" class="second-size-field">
+                    <label>2. Reifengröße</label>
+                    <div class="tire-size-builder">
+                      <select id="size2Width" aria-label="Zweite Reifenbreite"></select>
+                      <span>/</span>
+                      <select id="size2Aspect" aria-label="Zweiter Querschnitt"></select>
+                      <span>R</span>
+                      <select id="size2Rim" aria-label="Zweite Felgengröße"></select>
+                      <input id="size2Suffix" aria-label="Zweiter Tragfähigkeits- und Geschwindigkeitsindex" placeholder="99Y">
+                    </div>
+                    <input id="size2" type="hidden" value="">
+                  </div>
                 </div>
                 <div class="field">
                   <label for="brand">Hersteller / Fabrikat</label>
@@ -2172,7 +2192,7 @@ function normalizeAppointmentDate(value){
 }
 function blankTireSet(){
   return {
-    size:"", brand:"", quantity:"", tireConstruction:"", rimType:"",
+    size:"", size2:"", mixedTireSize:false, brand:"", quantity:"", tireConstruction:"", rimType:"",
     mounting:"", wheelCoverStored:false,
     wash:false, fl:"", fr:"", rl:"", rr:""
   };
@@ -2181,6 +2201,8 @@ function normalizeTireSet(value){
   const src = value && typeof value === "object" ? value : {};
   return {
     size: src.size ?? "",
+    size2: src.size2 ?? "",
+    mixedTireSize: !!src.mixedTireSize,
     brand: src.brand ?? "",
     quantity: src.quantity ?? "",
     tireConstruction: src.tireConstruction ?? "",
@@ -2196,7 +2218,7 @@ function normalizeTireSet(value){
 }
 function hasTireSetData(set){
   const t = normalizeTireSet(set);
-  return [t.size,t.brand,t.quantity,t.tireConstruction,t.rimType,t.mounting,t.fl,t.fr,t.rl,t.rr].some(v => String(v ?? "").trim() !== "") || t.wash || t.wheelCoverStored;
+  return [t.size,t.size2,t.brand,t.quantity,t.tireConstruction,t.rimType,t.mounting,t.fl,t.fr,t.rl,t.rr].some(v => String(v ?? "").trim() !== "") || t.wash || t.wheelCoverStored;
 }
 function getCustomerTireSets(c){
   const sets = {};
@@ -2238,6 +2260,7 @@ function populateTireSizeSelectors(){
   add(aspect,'','—'); for(let v=25;v<=85;v+=5) add(aspect,v);
   add(rim,'','—'); for(let v=12;v<=24;v++) add(rim,v);
 }
+  ["size2Width","size2Aspect","size2Rim"].forEach((id,i)=>{ const src=[["sizeWidth","sizeAspect","sizeRim"][i]]; const target=$(id); const original=$(src[0]); if(target && original) target.innerHTML=original.innerHTML; });
 function parseTireSize(value){
   const raw=String(value||'').trim();
   const m=raw.match(/^(\d{3})\/(\d{2})\s*R(\d{2})(?:\s+(.*))?$/i);
@@ -2260,9 +2283,31 @@ function writeTireSize(value){
   if($('sizeSuffix')) $('sizeSuffix').value=p.suffix;
   $('size').value=String(value||'').trim();
 }
+function syncTireSize2(){
+  const width=$("size2Width")?.value||"", aspect=$("size2Aspect")?.value||"", rim=$("size2Rim")?.value||"", suffix=$("size2Suffix")?.value.trim()||"";
+  let value="";
+  if(width && aspect && rim) value=`${width}/${aspect} R${rim}${suffix ? " "+suffix : ""}`;
+  else if(width || aspect || rim || suffix) value=[width && aspect ? `${width}/${aspect}` : (width||aspect), rim ? `R${rim}` : "", suffix].filter(Boolean).join(" ");
+  $("size2").value=value;
+  return value;
+}
+function writeTireSize2(value){
+  const p=parseTireSize(value);
+  if($("size2Width")) $("size2Width").value=p.width;
+  if($("size2Aspect")) $("size2Aspect").value=p.aspect;
+  if($("size2Rim")) $("size2Rim").value=p.rim;
+  if($("size2Suffix")) $("size2Suffix").value=p.suffix;
+  $("size2").value=String(value||"").trim();
+}
+function updateSecondSizeVisibility(){
+  const show=!!$("mixedTireSize")?.checked;
+  $("secondSizeField")?.classList.toggle("show",show);
+}
 function readTireFields(){
   return normalizeTireSet({
     size: syncTireSize(),
+    size2: syncTireSize2(),
+    mixedTireSize: $("mixedTireSize").checked,
     brand: $("brand").value.trim(),
     quantity: $("quantity").value,
     tireConstruction: document.querySelector('input[name="tireConstruction"]:checked')?.value || "",
@@ -2279,6 +2324,9 @@ function readTireFields(){
 function writeTireFields(data){
   const t = normalizeTireSet(data);
   writeTireSize(t.size);
+  writeTireSize2(t.size2);
+  $("mixedTireSize").checked = !!t.mixedTireSize;
+  updateSecondSizeVisibility();
   $("brand").value = t.brand;
   $("quantity").value = t.quantity;
   document.querySelectorAll('input[name="tireConstruction"]').forEach(r => r.checked = r.value === t.tireConstruction);
@@ -2293,7 +2341,7 @@ function writeTireFields(data){
   updateRimTypeField();
 }
 function setTireInputsEnabled(enabled){
-  ["sizeWidth","sizeAspect","sizeRim","sizeSuffix","brand","quantity","wash","fl","fr","rl","rr"].forEach(id => {
+  ["sizeWidth","sizeAspect","sizeRim","sizeSuffix","size2Width","size2Aspect","size2Rim","size2Suffix","mixedTireSize","brand","quantity","wash","fl","fr","rl","rr"].forEach(id => {
     const el = $(id);
     if(el) el.disabled = !enabled;
   });
@@ -3017,9 +3065,9 @@ function printCustomer(id){
 }
 
 let mobileFormStep=0;
-function initMobileFormSteps(){const sections=[...document.querySelectorAll('#customerForm .modal-content > .grid > .form-section')];const nav=document.querySelectorAll('#mobileFormNav button');if(!sections.length)return;function apply(){sections.forEach((x,i)=>x.classList.toggle('mobile-active',i===mobileFormStep));nav.forEach((x,i)=>x.classList.toggle('active',i===mobileFormStep));const tire=sections[2];if(tire){const body=tire.querySelector('.form-section-body');const grid=body?.querySelector(':scope > .grid');if(grid){const profileLabel=[...grid.children].find(x=>x.classList.contains('section-label'));const profileField=profileLabel?.nextElementSibling;const profileVisible=mobileFormStep===2;[profileLabel,profileField].forEach(x=>{if(x)x.classList.toggle('mobile-hidden-part',!profileVisible)});[...grid.children].filter(x=>x!==profileLabel&&x!==profileField).forEach(x=>x.classList.toggle('mobile-hidden-part',profileVisible));}}const p=$('mobilePrevStep'),n=$('mobileNextStep');if(p){p.disabled=mobileFormStep===0;p.style.opacity=mobileFormStep===0?'0.45':'1'}if(n)n.textContent=mobileFormStep===sections.length-1?'Speichern':'Weiter'}nav.forEach((b,i)=>b.addEventListener('click',()=>{mobileFormStep=i;apply()}));$('mobilePrevStep').addEventListener('click',()=>{if(mobileFormStep>0){mobileFormStep--;apply()}});$('mobileNextStep').addEventListener('click',()=>{if(mobileFormStep<sections.length-1){mobileFormStep++;apply()}else{$('customerForm').requestSubmit()}});window.applyMobileFormStep=apply;apply()}
+function initMobileFormSteps(){}
 initMobileFormSteps();
-function resetMobileFormStep(){mobileFormStep=0;if(window.applyMobileFormStep)window.applyMobileFormStep()}
+function resetMobileFormStep(){}
 
 function resetForm(){
   $("customerForm").reset();
@@ -3066,7 +3114,7 @@ function updateCompletenessNotice(){
     [$("lastNameField"), $("lastName").value.trim() !== ""],
     [$("licensePlateField"), $("licensePlate").value.trim() !== ""],
     [$("tireConstructionField"), activeTireSeason !== "" && document.querySelector('input[name="tireConstruction"]:checked') !== null],
-    [$("sizeField"), activeTireSeason !== "" && $("size").value.trim() !== ""],
+    [$("sizeField"), activeTireSeason !== "" && $("size").value.trim() !== "" && (!$("mixedTireSize").checked || $("size2").value.trim() !== "")],
     [$("seasonField"), seasonValue() !== ""]
   ];
   let incomplete=false;
@@ -3181,6 +3229,9 @@ document.querySelectorAll('input[name="tireConstruction"]').forEach(r=>r.addEven
 document.querySelectorAll('input[name="tireConstruction"],input[name="rimType"],input[name="mounting"]').forEach(r=>r.addEventListener("change",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
 $("wheelCoverStored").addEventListener("change",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();});
 
+$("mixedTireSize").addEventListener("change",()=>{updateSecondSizeVisibility();if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();});
+["size2Width","size2Aspect","size2Rim","size2Suffix"].forEach(id=>$(id).addEventListener("input",()=>{syncTireSize2();if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
+["size2Width","size2Aspect","size2Rim"].forEach(id=>$(id).addEventListener("change",()=>{syncTireSize2();if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
 $("rdks").addEventListener("change",updateRdksTypeVisibility);
 document.querySelectorAll(".rdks-method").forEach(cb=>cb.addEventListener("change",()=>handleRdksMethodChange(cb)));
 updateRdksTypeVisibility();
