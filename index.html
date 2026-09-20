@@ -903,6 +903,17 @@ body.printing-list #printSheet{
   margin-bottom:9px;
   border-bottom:2px solid #172033;
 }
+.print-brand-logo{
+  width:42mm;
+  max-height:16mm;
+  object-fit:contain;
+  object-position:left center;
+  display:block;
+  margin-bottom:4mm;
+}
+.list-print-head-left{
+  min-width:0;
+}
 .list-print-head h2{
   margin:0;
   font-size:18px;
@@ -1034,6 +1045,11 @@ body.printing-list #printSheet{
   padding:0 0 6px;
   margin-bottom:7px;
   border-bottom:2px solid #172033;
+}
+.print-like-head .print-brand-logo{
+  width:34mm;
+  max-height:13mm;
+  margin:0;
 }
 .print-like-head h2{margin:0;font-size:20px;font-weight:900;letter-spacing:-.02em}
 .print-like-date{margin-left:auto;font-size:10px;color:#687588;text-align:right;line-height:1.4}
@@ -1436,6 +1452,39 @@ body:not(.authenticated) .page{display:none}
   .tirebox .pos{font-size:10px}
 }
 
+
+/* Mobile customer form */
+.mobile-form-nav{display:none}.mobile-hidden-part{display:none!important}
+@media(max-width:600px){
+html,body{overflow-x:hidden;max-width:100vw}
+.modal{padding:0;align-items:stretch;overflow:hidden}
+.modal-box{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;display:flex;flex-direction:column;overflow:hidden;box-sizing:border-box}
+.modal-head{flex:0 0 auto;padding:12px 14px;min-height:54px;box-sizing:border-box}
+.modal-head h2{font-size:17px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mobile-form-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:7px 8px;border-bottom:1px solid var(--line);background:#f7f9fb;flex:0 0 auto}
+.mobile-form-nav button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:7px 3px;font-size:9px;font-weight:900;color:#52606f;min-width:0}
+.mobile-form-nav button.active{background:var(--soft);border-color:#bfcfff;color:var(--accent)}
+.modal-content{padding:8px;overflow:hidden;flex:1 1 auto;min-height:0}
+.modal-content>.grid{display:block;height:100%;min-width:0}
+.modal-content .form-section{display:none;min-width:0;max-width:100%;box-sizing:border-box}
+.modal-content .form-section.mobile-active{display:block;height:100%;overflow:hidden}
+.modal-content .form-section-body{padding:10px;min-width:0;box-sizing:border-box;overflow:hidden}
+.modal-content input,.modal-content select,.modal-content textarea{box-sizing:border-box;max-width:100%;min-width:0;font-size:16px}
+.modal-content .field{min-width:0;max-width:100%}
+.customer-top{display:grid;grid-template-columns:minmax(0,1fr) 105px;gap:8px}
+.name-stack{gap:8px}
+.form-section-head{padding:10px 11px}.form-section-head h3{font-size:15px}
+.seasons{gap:5px}.seasons label{padding:8px 7px;font-size:12px;min-width:0}
+.season-selector-top{padding:10px;margin-bottom:8px}.storage-appointment-row{grid-template-columns:1fr;gap:8px;margin:8px 0;padding:10px}
+.tire-size-builder{max-width:100%;overflow:hidden}.diagram{padding:8px;overflow:hidden}
+.car-grid{grid-template-columns:minmax(0,1fr) 92px minmax(0,1fr);gap:5px}.car{width:88px;height:190px}
+.window,.window2{left:24px;right:24px;height:42px}.wheel{width:18px;height:46px}.wfl,.wfr{top:31px}.whl,.whr{bottom:31px}
+.tirebox .pos{font-size:9px}.tirebox small{font-size:8px}.tirebox input{font-size:14px;padding:8px}.direction{font-size:8px;margin:2px 0 5px}
+.modal-actions{flex:0 0 auto;padding:8px 10px;box-sizing:border-box}.modal-buttons{gap:6px}.right-actions{flex:1;display:grid;grid-template-columns:1fr 1.5fr;gap:6px}.modal-buttons .btn{min-height:42px;padding:8px 9px;font-size:12px}
+.mobile-step-actions{display:flex;gap:6px;margin-top:8px}.mobile-step-actions button{flex:1;min-height:40px;border-radius:9px;border:1px solid #d5dde7;background:#fff;font-weight:900;font-size:12px}.mobile-step-actions button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+}
+@media(min-width:601px){.mobile-step-actions{display:none!important}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1618,6 +1667,9 @@ body:not(.authenticated) .page{display:none}
     <div class="modal-head">
       <h2 id="modalTitle">Kunde hinzufügen</h2>
       <button class="close" id="closeBtn" aria-label="Schließen">×</button>
+    </div>
+    <div class="mobile-form-nav" id="mobileFormNav" aria-label="Kundenformular Schritte">
+      <button type="button" data-step="0">Kunde</button><button type="button" data-step="1">Fahrzeug</button><button type="button" data-step="2">Reifen</button><button type="button" data-step="3">Notiz</button>
     </div>
 
     <form id="customerForm">
@@ -1888,6 +1940,7 @@ body:not(.authenticated) .page{display:none}
             </div>
           </div>
         </div>
+        <div class="mobile-step-actions" id="mobileStepActions"><button type="button" id="mobilePrevStep">Zurück</button><button type="button" class="primary" id="mobileNextStep">Weiter</button></div>
       </div>
 
       <div class="modal-actions">
@@ -2652,8 +2705,10 @@ function printBackup(){
   </section>`).join("");
 
   $("printSheet").className="backup-mode";
+  const printLogoSrc = document.querySelector(".auth-brand .logo")?.src || "";
+  const printLogo = printLogoSrc ? `<img class="print-brand-logo" src="${printLogoSrc}" alt="PBT Racing">` : "";
   $("printSheet").innerHTML = `<div class="backup-print-sheet">
-    <div class="backup-print-head"><div><h2>Reifenservice – Kundensicherung</h2><div class="backup-print-subtitle">Wichtige Kundendaten für alle ${list.length} ${list.length===1?"Kunden":"Kunden"}</div></div><div class="backup-print-meta">Erstellt am: ${formatDate(todayISO())}</div></div>
+    <div class="backup-print-head"><div>${printLogo}<h2>Reifenservice – Kundensicherung</h2><div class="backup-print-subtitle">Wichtige Kundendaten für alle ${list.length} ${list.length===1?"Kunden":"Kunden"}</div></div><div class="backup-print-meta"></div></div>
     ${customerBlocks}
   </div>`;
   document.body.classList.add("printing-backup");
@@ -2682,7 +2737,9 @@ function printCustomerList(){
     return low.length ? `<div class="status-new">⚠ Neue Reifen</div><div class="muted">${low.map(esc).join(", ")}</div>` : `<div class="status-ok">✓ OK</div>`;
   };
   $("printSheet").className="list-mode";
-  $("printSheet").innerHTML=`<div class="list-print-sheet"><div class="list-print-head"><div><h2>Reifenservice – Kundenliste</h2><div class="list-print-subtitle">${filterText}</div></div><div class="list-print-meta">${list.length} ${list.length===1?"Kunde":"Kunden"}<br>Erstellt am: ${formatDate(todayISO())}</div></div>
+  const printLogoSrc = document.querySelector(".auth-brand .logo")?.src || "";
+  const printLogo = printLogoSrc ? `<img class="print-brand-logo" src="${printLogoSrc}" alt="PBT Racing">` : "";
+  $("printSheet").innerHTML=`<div class="list-print-sheet"><div class="list-print-head"><div class="list-print-head-left">${printLogo}<h2>Reifenservice – Kundenliste</h2><div class="list-print-subtitle">${filterText}</div></div><div class="list-print-meta">${list.length} ${list.length===1?"Kunde":"Kunden"}</div></div>
   <table class="list-print-table"><colgroup><col style="width:7%"><col style="width:18%"><col style="width:10%"><col style="width:11%"><col style="width:9%"><col style="width:20%"><col style="width:8%"><col style="width:8%"><col style="width:9%"></colgroup><thead><tr><th>Kunden-Nr.</th><th>Kunde</th><th>Kfz-Kennzeichen</th><th>Reifenart</th><th>PKW-Art</th><th>Hersteller / Größe</th><th>Lagerplatz</th><th>Wechseltermin</th><th>Reifenstatus</th></tr></thead><tbody>${list.map(c=>{const season=selectedSeason||firstStoredSeason(c);const t=getTireSet(c,season)||blankTireSet();return `<tr><td>${printText(c.customerNumber)}</td><td><div class="strong">${printText(c.firstName)} ${printText(c.lastName)}</div></td><td>${printText(c.licensePlate)}</td><td><div class="strong">${t.quantity?esc(t.quantity)+" × ":""}${printText(season)}</div></td><td>${printText(c.vehicleType)}</td><td><div class="strong">${printText(t.brand)}</div><div class="muted">${printText(t.size)}</div></td><td>${printText(c.storage)}</td><td>${c.changeAppointment?printText(formatDate(c.changeAppointment)):"—"}</td><td>${statusText(c)}</td></tr>`;}).join("")}</tbody></table></div>`;
   document.body.classList.add("printing-list");
   setTimeout(()=>window.print(),80);
@@ -2705,7 +2762,9 @@ function printCustomer(id){
     return `<div class="print-tire-set"><div class="print-grid-full"><div class="field"><label>Reifenart</label><div class="print-value tire-season-print-value"><strong>${esc(season || "Reifenart nicht angegeben")}</strong></div></div></div><div class="print-grid-2" style="margin-top:8px"><div class="field"><label>Reifengröße ${t.size?"":'<span class="required-star">*</span>'}</label><div class="print-value ${t.size?"":"missing"}">${printText(t.size)}</div></div><div class="field"><label>Hersteller / Fabrikat</label><div class="print-value">${printText(t.brand)}</div></div></div><div class="print-grid-3" style="margin-top:10px"><div class="field"><label>Stück</label><div class="print-value">${printText(t.quantity)}</div></div><div class="field"><label>Reifenausführung ${t.tireConstruction?"":'<span class="required-star">*</span>'}</label><div class="print-value ${t.tireConstruction?"":"missing"}">${printText(t.tireConstruction)}</div></div><div class="field"><label>Felgenart</label><div class="print-value">${printText(rimLabel(t))}</div></div></div><div class="print-grid-2" style="margin-top:10px"><div class="field"><label>Anbaumaterial</label><div class="print-options">${printOption("Mit eingelagert",t.mounting==="Mit eingelagert")}${printOption("Im Fahrzeug",t.mounting==="Im Fahrzeug")}${printOption("Serie",t.mounting==="Serie")}</div></div><div class="field"><label>Radabdeckung</label><div class="print-value">${t.wheelCoverStored?"✓ Mit eingelagert":"Nicht eingelagert"}</div></div></div><div class="print-grid-full" style="margin-top:10px"><div class="field"><label>RDKS</label><div class="print-value">${c.rdks?("✓ Ja" + (c.rdksType ? " – " + esc(c.rdksType) : "")):"Nein"}</div></div><div class="field"><label>Waschen</label><div class="print-value">${t.wash?"✓ Waschen":"Nein"}</div></div><div class="field"><label>Lagerplatz</label><div class="print-value">${printText(c.storage)}</div></div></div><div class="section-label print-profile-title">Profiltiefe am Fahrzeug</div><div class="print-grid-4 tread-print-grid"><div class="field"><label>Vorne links</label><div class="print-value">${t.fl!==""&&t.fl!=null?esc(t.fl)+" mm":"—"}</div></div><div class="field"><label>Vorne rechts</label><div class="print-value">${t.fr!==""&&t.fr!=null?esc(t.fr)+" mm":"—"}</div></div><div class="field"><label>Hinten links</label><div class="print-value">${t.rl!==""&&t.rl!=null?esc(t.rl)+" mm":"—"}</div></div><div class="field"><label>Hinten rechts</label><div class="print-value">${t.rr!==""&&t.rr!=null?esc(t.rr)+" mm":"—"}</div></div></div>${lowHtml(season,t)}</div>`;
   }).join("");
   $("printSheet").className="";
-  $("printSheet").innerHTML=`<div class="print-sheet"><div class="print-like-head"><h2>${printText(c.firstName)} ${printText(c.lastName)}</h2><div class="print-like-date">Kunden-Nr.: <strong>${printText(c.customerNumber)}</strong><br>Erstellt am: <strong>${formatDate(c.createdAt)}</strong></div></div>
+  const printLogoSrc = document.querySelector(".auth-brand .logo")?.src || "";
+  const printLogo = printLogoSrc ? `<img class="print-brand-logo" src="${printLogoSrc}" alt="PBT Racing">` : "";
+  $("printSheet").innerHTML=`<div class="print-sheet"><div class="print-like-head"><div>${printLogo}</div><h2>${printText(c.firstName)} ${printText(c.lastName)}</h2><div class="print-like-date">Kunden-Nr.: <strong>${printText(c.customerNumber)}</strong></div></div>
   <div class="form-section"><div class="form-section-head"><div class="section-icon">👤</div><h3>Kundendaten</h3></div><div class="form-section-body"><div class="print-grid-3 customer-print-top"><div class="field"><label>Vorname ${c.firstName?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.firstName?"":"missing"}">${printText(c.firstName)}</div></div><div class="field"><label>Nachname ${c.lastName?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.lastName?"":"missing"}">${printText(c.lastName)}</div></div><div class="field"><label>Kunden-Nr.</label><div class="print-value">${printText(c.customerNumber)}</div></div></div><div class="print-grid-full" style="margin-top:8px"><div class="field"><label>Anschrift</label><div class="print-value">${printText(c.address)}</div></div></div><div class="print-grid-2" style="margin-top:8px"><div class="field"><label>Telefon</label><div class="print-value">${printText(c.phone)}</div></div><div class="field"><label>E-Mail-Adresse</label><div class="print-value">${printText(c.email)}</div></div></div></div></div>
   <div class="form-section"><div class="form-section-head"><div class="section-icon">🚗</div><h3>Fahrzeugdaten</h3></div><div class="form-section-body"><div class="print-grid-2"><div class="field"><label>Kfz-Kennzeichen ${c.licensePlate?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.licensePlate?"":"missing"}">${printText(c.licensePlate)}</div></div><div class="field"><label>Kilometerstand</label><div class="print-value">${c.mileage?esc(c.mileage)+" km":"—"}</div></div></div><div class="print-grid-3" style="margin-top:10px"><div class="field"><label>Fahrzeughersteller</label><div class="print-value">${printText(c.vehicleManufacturer)}</div></div><div class="field"><label>Fahrzeugtyp / Modell</label><div class="print-value">${printText(c.vehicleModel)}</div></div><div class="field"><label>PKW-Art / Fahrzeugklasse</label><div class="print-value">${printText(c.vehicleType)}</div></div></div></div></div>
   <div class="form-section"><div class="form-section-head"><div class="section-icon">🛞</div><h3>Reifendaten</h3></div><div class="form-section-body">${tireBlocks}</div></div>
@@ -2715,6 +2774,11 @@ function printCustomer(id){
   document.body.classList.add("printing");
   setTimeout(()=>window.print(),80);
 }
+
+let mobileFormStep=0;
+function initMobileFormSteps(){const sections=[...document.querySelectorAll('#customerForm .modal-content > .grid > .form-section')];const nav=document.querySelectorAll('#mobileFormNav button');if(!sections.length)return;function apply(){sections.forEach((x,i)=>x.classList.toggle('mobile-active',i===mobileFormStep));nav.forEach((x,i)=>x.classList.toggle('active',i===mobileFormStep));const tire=sections[2];if(tire){const body=tire.querySelector('.form-section-body');const grid=body?.querySelector(':scope > .grid');if(grid){const profileLabel=[...grid.children].find(x=>x.classList.contains('section-label'));const profileField=profileLabel?.nextElementSibling;const profileVisible=mobileFormStep===2;[profileLabel,profileField].forEach(x=>{if(x)x.classList.toggle('mobile-hidden-part',!profileVisible)});[...grid.children].filter(x=>x!==profileLabel&&x!==profileField).forEach(x=>x.classList.toggle('mobile-hidden-part',profileVisible));}}const p=$('mobilePrevStep'),n=$('mobileNextStep');if(p){p.disabled=mobileFormStep===0;p.style.opacity=mobileFormStep===0?'0.45':'1'}if(n)n.textContent=mobileFormStep===sections.length-1?'Speichern':'Weiter'}nav.forEach((b,i)=>b.addEventListener('click',()=>{mobileFormStep=i;apply()}));$('mobilePrevStep').addEventListener('click',()=>{if(mobileFormStep>0){mobileFormStep--;apply()}});$('mobileNextStep').addEventListener('click',()=>{if(mobileFormStep<sections.length-1){mobileFormStep++;apply()}else{$('customerForm').requestSubmit()}});window.applyMobileFormStep=apply;apply()}
+initMobileFormSteps();
+function resetMobileFormStep(){mobileFormStep=0;if(window.applyMobileFormStep)window.applyMobileFormStep()}
 
 function resetForm(){
   $("customerForm").reset();
@@ -2775,6 +2839,7 @@ function openNew(){
   $("modalTitle").textContent="Kunde hinzufügen";
   $("deleteBtn").style.display="none";
   $("modal").classList.add("open");
+  resetMobileFormStep();
   $("firstName").focus();
 }
 function openCustomer(id){
@@ -2809,6 +2874,7 @@ function openCustomer(id){
   $("modalTitle").textContent=`${c.firstName} ${c.lastName}`;
   $("deleteBtn").style.display="block";
   $("modal").classList.add("open");
+  resetMobileFormStep();
 }
 function closeModal(){ $("modal").classList.remove("open"); }
 
