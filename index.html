@@ -20,6 +20,11 @@
   display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;
   background:#edf8f2;color:var(--success);font-size:11px;font-weight:800;white-space:nowrap
 }
+.status-missing{
+  color:var(--muted);
+  font-size:13px;
+  font-weight:900;
+}
 .status-warn{
   display:flex;flex-direction:column;gap:4px;align-items:flex-start
 }
@@ -254,7 +259,7 @@ h1{margin:0;font-size:30px;letter-spacing:-.03em}
   color:var(--danger);
   font-weight:800;
 }
-.mixed-size-toggle{margin-top:10px}.second-size-field{display:none;margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fafbfd}.second-size-field.show{display:block}.second-size-field>label{display:block;margin-bottom:6px;font-size:12px;font-weight:800;color:#3d4a59}
+.mixed-size-toggle{margin-top:10px}.second-size-field{display:none;margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fafbfd}.second-size-field.show{display:block}.mixed-brand-field{margin-top:10px}
 .field label{font-size:12px;font-weight:800;color:#3d4a59}
 .field.compact input{width:110px;max-width:100%}
 .form-section{
@@ -1864,11 +1869,10 @@ html,body{overflow-x:hidden;max-width:100vw}
                     <label class="wash-toggle">
                       <input id="mixedTireSize" type="checkbox">
                       <span class="wash-box"></span>
-                      <span>Mischbereifung / zweite Reifengröße</span>
+                      <span>Mischbereifung</span>
                     </label>
                   </div>
                   <div id="secondSizeField" class="second-size-field">
-                    <label>2. Reifengröße</label>
                     <div class="tire-size-builder">
                       <select id="size2Width" aria-label="Zweite Reifenbreite"></select>
                       <span>/</span>
@@ -1879,10 +1883,10 @@ html,body{overflow-x:hidden;max-width:100vw}
                     </div>
                     <input id="size2" type="hidden" value="">
                   </div>
-                </div>
-                <div class="field">
-                  <label for="brand">Hersteller / Fabrikat</label>
-                  <input id="brand" placeholder="z. B. Michelin">
+                  <div class="field mixed-brand-field">
+                    <label for="brand">Hersteller / Fabrikat</label>
+                    <input id="brand" placeholder="z. B. Michelin">
+                  </div>
                 </div>
                 <div class="field full">
                   <div class="tire-construction-row">
@@ -2431,13 +2435,19 @@ function needsNewTires(c, season){
 function tireStatus(c, season){
   const useSeason = season || firstStoredSeason(c);
   const t = getTireSet(c, useSeason);
-  if(!t || !useSeason) return '<span class="status-ok">✓ OK</span>';
+  if(!t || !useSeason) return '<span class="status-missing">—</span>';
   const positions = [["Vorne links", t.fl],["Vorne rechts", t.fr],["Hinten links", t.rl],["Hinten rechts", t.rr]];
-  const threshold = useSeason === "Sommerreifen" ? 3 : 4;
-  const low = positions.filter(([,value]) => {
+  // Ein Reifenstatus wird erst angezeigt, wenn für alle vier Positionen eine Profiltiefe hinterlegt ist.
+  const complete = positions.every(([,value]) => {
     if(value === "" || value === null || value === undefined) return false;
     const mm = Number(String(value).replace(",", "."));
-    return !Number.isNaN(mm) && mm <= threshold;
+    return !Number.isNaN(mm);
+  });
+  if(!complete) return '<span class="status-missing">—</span>';
+  const threshold = useSeason === "Sommerreifen" ? 3 : 4;
+  const low = positions.filter(([,value]) => {
+    const mm = Number(String(value).replace(",", "."));
+    return mm <= threshold;
   }).map(([label]) => label);
   if(!low.length) return '<span class="status-ok">✓ OK</span>';
   return `<div class="status-warn"><span class="status-title">⚠ Neue Reifen</span><div class="status-locations">${low.map(esc).join("<br>")}</div></div>`;
@@ -3004,8 +3014,9 @@ function printCustomer(id){
     const t=sets[season] || blankTireSet();
     const threshold=season === "Sommerreifen" ? 3 : 4;
     const positions=[["VL",t.fl,"Vorne links"],["VR",t.fr,"Vorne rechts"],["HL",t.rl,"Hinten links"],["HR",t.rr,"Hinten rechts"]];
-    const low=positions.filter(([,v])=>v!==""&&v!==null&&v!==undefined).filter(([,v])=>{const mm=Number(String(v).replace(",","."));return !Number.isNaN(mm)&&mm<=threshold;});
-    const status=low.length ? `<span class="customer-print-status warn">⚠ Neue Reifen</span><span class="customer-print-status-detail">${low.map(([,v,label])=>esc(label)).join(", ")}</span>` : `<span class="customer-print-status ok">✓ OK</span>`;
+    const complete=positions.every(([,v])=>v!==""&&v!==null&&v!==undefined&&!Number.isNaN(Number(String(v).replace(",","."))));
+    const low=complete ? positions.filter(([,v])=>{const mm=Number(String(v).replace(",","."));return mm<=threshold;}) : [];
+    const status=!complete ? `<span class="customer-print-status missing">—</span>` : (low.length ? `<span class="customer-print-status warn">⚠ Neue Reifen</span><span class="customer-print-status-detail">${low.map(([,v,label])=>esc(label)).join(", ")}</span>` : `<span class="customer-print-status ok">✓ OK</span>`);
     return `<div class="customer-print-tire">
       <div class="customer-print-tire-head"><div><span class="customer-print-tire-season">${esc(season || "Reifenart nicht angegeben")}</span><span class="customer-print-tire-sub">${t.quantity ? esc(t.quantity)+" × " : ""}${esc(t.tireConstruction || "")}${rimLabel(t) ? " · "+esc(rimLabel(t)) : ""}</span></div><div class="customer-print-status-wrap">${status}</div></div>
       <div class="customer-print-tire-grid">
