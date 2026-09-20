@@ -63,6 +63,10 @@ body{
   margin:0;background:var(--bg);color:var(--text);
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
+body.modal-open{
+  overflow:hidden !important;
+  touch-action:none;
+}
 .page{width:100%;max-width:none;margin:30px 0}
 
 .brand-header{
@@ -417,6 +421,10 @@ tbody tr:hover{background:#f8faff}
   align-items:center;justify-content:center;padding:20px;z-index:20
 }
 .modal.open{display:flex}
+.modal{
+  overscroll-behavior:contain;
+  touch-action:none;
+}
 .modal-box{
   width:min(980px,100%);max-height:92vh;overflow:auto;background:#fff;
   border-radius:20px;box-shadow:0 25px 70px rgba(0,0,0,.22)
@@ -3045,11 +3053,13 @@ function updateCompletenessNotice(){
 }
 function openNew(){
   editingId=null;
+  document.body.classList.add("modal-open");
   resetForm();
   $("createdDisplay").value=todayISO();
   $("modalTitle").textContent="Kunde hinzufügen";
   $("deleteBtn").style.display="none";
   $("modal").classList.add("open");
+  document.body.classList.add("modal-open");
   resetMobileFormStep();
   $("firstName").focus();
 }
@@ -3085,9 +3095,13 @@ function openCustomer(id){
   $("modalTitle").textContent=`${c.firstName} ${c.lastName}`;
   $("deleteBtn").style.display="block";
   $("modal").classList.add("open");
+  document.body.classList.add("modal-open");
   resetMobileFormStep();
 }
-function closeModal(){ $("modal").classList.remove("open"); }
+function closeModal(){
+  $("modal").classList.remove("open");
+  document.body.classList.remove("modal-open");
+}
 
 $("addBtn").onclick=openNew;
 $("navCustomers").onclick=()=>switchView("customers");
@@ -3112,6 +3126,10 @@ $("printListBtn").onclick=printCustomerList;
 $("backupBtn").onclick=printBackup;
 updateStatusFilterVisibility();
 $("modal").addEventListener("click",e=>{if(e.target.id==="modal") closeModal();});
+$("modal").addEventListener("touchmove",e=>{
+  const content=e.target.closest(".modal-content");
+  if(!content) e.preventDefault();
+},{passive:false});
 $("firstName").addEventListener("input",updateCompletenessNotice);
 $("lastName").addEventListener("input",updateCompletenessNotice);
 $("licensePlate").addEventListener("input",updateCompletenessNotice);
