@@ -583,6 +583,11 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin:18px 0 30px}
 @media (max-width:800px){
   .page{width:calc(100% - 18px);margin:16px auto}
   .header{flex-direction:column}
+  .card-head{flex-direction:column;align-items:stretch;gap:14px}
+  .card-head > div:first-child{min-width:0}
+  .card-head .actions{display:grid;grid-template-columns:1fr;gap:10px;width:100%}
+  .card-head .actions .btn{width:100%;min-width:0;white-space:nowrap;justify-content:center;box-sizing:border-box}
+
   .controls{grid-template-columns:1fr}
   .status-filter.show{grid-template-columns:1fr}
   .actions{align-items:stretch}
