@@ -3022,7 +3022,7 @@ function printCustomer(id){
       const mm=Number(String(v).replace(",","."));
       return !Number.isNaN(mm) && mm<=threshold;
     });
-    const status=low.length ? `<span class="customer-print-status warn">⚠ Neue Reifen</span><span class="customer-print-status-detail">${low.map(([,v,label])=>esc(label)).join(", ")}</span>` : `<span class="customer-print-status ok">✓ OK</span>`);
+    const status=low.length ? `<span class="customer-print-status warn">⚠ Neue Reifen</span><span class="customer-print-status-detail">${low.map(([,v,label])=>esc(label)).join(", ")}</span>` : `<span class="customer-print-status ok">✓ OK</span>`;
     return `<div class="customer-print-tire">
       <div class="customer-print-tire-head"><div><span class="customer-print-tire-season">${esc(season || "Reifenart nicht angegeben")}</span><span class="customer-print-tire-sub">${t.quantity ? esc(t.quantity)+" × " : ""}${esc(t.tireConstruction || "")}${rimLabel(t) ? " · "+esc(rimLabel(t)) : ""}</span></div><div class="customer-print-status-wrap">${status}</div></div>
       <div class="customer-print-tire-grid">
