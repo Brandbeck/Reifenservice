@@ -176,6 +176,10 @@ h1{margin:0;font-size:30px;letter-spacing:-.03em}
   padding:16px 22px;display:grid;grid-template-columns:1fr 1fr 210px minmax(330px,1fr) auto;gap:12px;
   border-bottom:1px solid var(--line)
 }
+ .tire-size-builder{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0}
+.tire-size-builder select,.tire-size-builder input{height:44px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;padding:0 10px;font:inherit;color:#1f2937;box-sizing:border-box}
+#sizeWidth{width:92px}.tire-size-builder span{font-weight:800;color:#334155}.tire-size-builder #sizeAspect{width:82px}.tire-size-builder #sizeRim{width:78px}.tire-size-builder #sizeSuffix{width:100px}
+@media(max-width:700px){.tire-size-builder{gap:4px}.tire-size-builder select,.tire-size-builder input{height:42px;padding:0 7px;font-size:15px}.tire-size-builder #sizeWidth{width:78px}.tire-size-builder #sizeAspect{width:70px}.tire-size-builder #sizeRim{width:68px}.tire-size-builder #sizeSuffix{width:82px}}
 .field{display:flex;flex-direction:column;gap:6px}
 .status-filter{
   display:none;
@@ -1562,13 +1566,13 @@ body:not(.authenticated) .page{display:none}
               <div class="grid">
                 <div class="customer-top">
                   <div class="name-stack">
-                    <div class="field" id="firstNameField">
-                      <label for="firstName">Vorname <span class="required-star">*</span></label>
-                      <input id="firstName">
-                    </div>
                     <div class="field" id="lastNameField">
                       <label for="lastName">Nachname <span class="required-star">*</span></label>
                       <input id="lastName">
+                    </div>
+                    <div class="field" id="firstNameField">
+                      <label for="firstName">Vorname <span class="required-star">*</span></label>
+                      <input id="firstName">
                     </div>
                   </div>
                   <div class="field compact">
@@ -1686,8 +1690,16 @@ body:not(.authenticated) .page{display:none}
 
               <div class="grid">
                 <div class="field" id="sizeField">
-                  <label for="size">Reifengröße <span class="required-star">*</span></label>
-                  <input id="size" placeholder="z. B. 225/45 R17 94W">
+                  <label>Reifengröße <span class="required-star">*</span></label>
+                  <div class="tire-size-builder" id="tireSizeBuilder">
+                    <select id="sizeWidth" aria-label="Reifenbreite"></select>
+                    <span>/</span>
+                    <select id="sizeAspect" aria-label="Querschnitt"></select>
+                    <span>R</span>
+                    <select id="sizeRim" aria-label="Felgengröße"></select>
+                    <input id="sizeSuffix" aria-label="Tragfähigkeits- und Geschwindigkeitsindex" placeholder="94W">
+                  </div>
+                  <input id="size" type="hidden" value="">
                 </div>
                 <div class="field">
                   <label for="brand">Hersteller / Fabrikat</label>
@@ -2046,9 +2058,39 @@ let activeTireSeason = "";
 function seasonDataFromDraft(season){
   return draftTireSets[season] ? normalizeTireSet(draftTireSets[season]) : blankTireSet();
 }
+function populateTireSizeSelectors(){
+  const width=$('sizeWidth'), aspect=$('sizeAspect'), rim=$('sizeRim');
+  if(!width || !aspect || !rim) return;
+  const add=(el,value,label=value)=>{ const o=document.createElement('option'); o.value=String(value); o.textContent=label; el.appendChild(o); };
+  add(width,'','—'); for(let v=145;v<=325;v+=5) add(width,v);
+  add(aspect,'','—'); for(let v=25;v<=85;v+=5) add(aspect,v);
+  add(rim,'','—'); for(let v=12;v<=24;v++) add(rim,v);
+}
+function parseTireSize(value){
+  const raw=String(value||'').trim();
+  const m=raw.match(/^(\d{3})\/(\d{2})\s*R(\d{2})(?:\s+(.*))?$/i);
+  if(m) return {width:m[1],aspect:m[2],rim:m[3],suffix:(m[4]||'').trim()};
+  return {width:'',aspect:'',rim:'',suffix:raw};
+}
+function syncTireSize(){
+  const width=$('sizeWidth')?.value||'', aspect=$('sizeAspect')?.value||'', rim=$('sizeRim')?.value||'', suffix=$('sizeSuffix')?.value.trim()||'';
+  let value='';
+  if(width && aspect && rim){ value=`${width}/${aspect} R${rim}${suffix ? ' '+suffix : ''}`; }
+  else if(width || aspect || rim || suffix){ value=[width && aspect ? `${width}/${aspect}` : (width||aspect), rim ? `R${rim}` : '', suffix].filter(Boolean).join(' '); }
+  $('size').value=value;
+  return value;
+}
+function writeTireSize(value){
+  const p=parseTireSize(value);
+  if($('sizeWidth')) $('sizeWidth').value=p.width;
+  if($('sizeAspect')) $('sizeAspect').value=p.aspect;
+  if($('sizeRim')) $('sizeRim').value=p.rim;
+  if($('sizeSuffix')) $('sizeSuffix').value=p.suffix;
+  $('size').value=String(value||'').trim();
+}
 function readTireFields(){
   return normalizeTireSet({
-    size: $("size").value.trim(),
+    size: syncTireSize(),
     brand: $("brand").value.trim(),
     quantity: $("quantity").value,
     tireConstruction: document.querySelector('input[name="tireConstruction"]:checked')?.value || "",
@@ -2064,7 +2106,7 @@ function readTireFields(){
 }
 function writeTireFields(data){
   const t = normalizeTireSet(data);
-  $("size").value = t.size;
+  writeTireSize(t.size);
   $("brand").value = t.brand;
   $("quantity").value = t.quantity;
   document.querySelectorAll('input[name="tireConstruction"]').forEach(r => r.checked = r.value === t.tireConstruction);
@@ -2079,7 +2121,7 @@ function writeTireFields(data){
   updateRimTypeField();
 }
 function setTireInputsEnabled(enabled){
-  ["size","brand","quantity","wash","fl","fr","rl","rr"].forEach(id => {
+  ["sizeWidth","sizeAspect","sizeRim","sizeSuffix","brand","quantity","wash","fl","fr","rl","rr"].forEach(id => {
     const el = $(id);
     if(el) el.disabled = !enabled;
   });
@@ -2552,7 +2594,8 @@ document.querySelectorAll('input[name="season"]').forEach(r=>r.addEventListener(
   updateCompletenessNotice();
 }));
 document.querySelectorAll('input[name="tireConstruction"]').forEach(r=>r.addEventListener("change",()=>{updateRimTypeField();updateCompletenessNotice();}));
-["size","brand","quantity","wash","fl","fr","rl","rr"].forEach(id=>$(id).addEventListener("input",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
+["sizeWidth","sizeAspect","sizeRim","sizeSuffix","brand","quantity","wash","fl","fr","rl","rr"].forEach(id=>$(id).addEventListener("input",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
+["sizeWidth","sizeAspect","sizeRim"].forEach(id=>$(id).addEventListener("change",()=>{syncTireSize();if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
 document.querySelectorAll('input[name="tireConstruction"],input[name="rimType"],input[name="mounting"]').forEach(r=>r.addEventListener("change",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
 $("wheelCoverStored").addEventListener("change",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();});
 
@@ -2659,6 +2702,7 @@ $("logoutBtn").addEventListener("click", async () => {
 });
 
 async function initApp(){
+  populateTireSizeSelectors();
   if(window.supabase && window.supabase.createClient){
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
   }
