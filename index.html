@@ -1375,23 +1375,26 @@ body:not(.authenticated) .page{display:none}
             </div>
           </div>
 
-          <div class="tire-storage-row">
-            <div class="field">
-              <label>Anbaumaterial</label>
-              <div class="seasons horizontal-options" id="mountingOptions">
-                <label><input type="radio" name="mounting" value="Mit eingelagert"> Mit eingelagert</label>
-                <label><input type="radio" name="mounting" value="Im Fahrzeug"> Im Fahrzeug</label>
-                <label><input type="radio" name="mounting" value="Serie"> Serie</label>
+          <div class="season-specific-equipment">
+            <div class="section-label">Zusatzdaten für <span id="seasonSpecificEquipmentTitle">die ausgewählte Reifenart</span></div>
+            <div class="tire-storage-row">
+              <div class="field">
+                <label>Anbaumaterial</label>
+                <div class="seasons horizontal-options" id="mountingOptions">
+                  <label><input type="radio" name="mounting" value="Mit eingelagert"> Mit eingelagert</label>
+                  <label><input type="radio" name="mounting" value="Im Fahrzeug"> Im Fahrzeug</label>
+                  <label><input type="radio" name="mounting" value="Serie"> Serie</label>
+                </div>
+                <div class="season-switch-hint">Die Auswahl wird separat für Sommer-, Winter- und Ganzjahresreifen gespeichert.</div>
               </div>
-              <div class="season-switch-hint">Die Auswahl gehört zur aktuell ausgewählten Reifenart.</div>
-            </div>
-            <div class="field">
-              <label>Radabdeckung</label>
-              <label class="wash-toggle">
-                <input id="wheelCoverStored" type="checkbox">
-                <span class="wash-box"></span>
-                <span>Mit eingelagert</span>
-              </label>
+              <div class="field">
+                <label>Radabdeckung</label>
+                <label class="wash-toggle">
+                  <input id="wheelCoverStored" type="checkbox">
+                  <span class="wash-box"></span>
+                  <span>Mit eingelagert</span>
+                </label>
+              </div>
             </div>
           </div>
 
@@ -1684,6 +1687,8 @@ function seasonValue(){
 }
 function setSeason(v){
   document.querySelectorAll('input[name="season"]').forEach(r => r.checked = r.value === v);
+  const title = $("seasonSpecificEquipmentTitle");
+  if(title) title.textContent = v || "die ausgewählte Reifenart";
 }
 function normalizeAppointmentDate(value){
   if(!value) return "";
