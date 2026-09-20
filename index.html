@@ -186,6 +186,7 @@ h1{margin:0;font-size:30px;letter-spacing:-.03em}
   border-bottom:1px solid var(--line)
 }
  .tire-size-builder{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0}
+.tire-size-brand-row{display:flex;align-items:flex-end;gap:12px;flex-wrap:nowrap;min-width:0}.tire-brand-inline{width:220px;min-width:180px}.tire-brand-inline input{height:44px}.second-size-field .tire-brand-inline{margin:0}@media(max-width:700px){.tire-size-brand-row{gap:7px;overflow-x:auto;padding-bottom:2px}.tire-brand-inline{width:170px;min-width:170px}.tire-brand-inline input{height:42px;font-size:15px}.second-size-field{overflow:hidden}}
 .tire-size-builder select,.tire-size-builder input{height:44px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;padding:0 10px;font:inherit;color:#1f2937;box-sizing:border-box}
 #sizeWidth{width:92px}.tire-size-builder span{font-weight:800;color:#334155}.tire-size-builder #sizeAspect{width:82px}.tire-size-builder #sizeRim{width:78px}.tire-size-builder #sizeSuffix{width:100px}
 @media(max-width:700px){.tire-size-builder{gap:4px}.tire-size-builder select,.tire-size-builder input{height:42px;padding:0 7px;font-size:15px}.tire-size-builder #sizeWidth{width:78px}.tire-size-builder #sizeAspect{width:70px}.tire-size-builder #sizeRim{width:68px}.tire-size-builder #sizeSuffix{width:82px}}
@@ -1856,13 +1857,19 @@ html,body{overflow-x:hidden;max-width:100vw}
               <div class="grid">
                 <div class="field" id="sizeField">
                   <label>Reifengröße <span class="required-star">*</span></label>
-                  <div class="tire-size-builder" id="tireSizeBuilder">
-                    <select id="sizeWidth" aria-label="Reifenbreite"></select>
-                    <span>/</span>
-                    <select id="sizeAspect" aria-label="Querschnitt"></select>
-                    <span>R</span>
-                    <select id="sizeRim" aria-label="Felgengröße"></select>
-                    <input id="sizeSuffix" aria-label="Tragfähigkeits- und Geschwindigkeitsindex" placeholder="94W">
+                  <div class="tire-size-brand-row">
+                    <div class="tire-size-builder" id="tireSizeBuilder">
+                      <select id="sizeWidth" aria-label="Reifenbreite"></select>
+                      <span>/</span>
+                      <select id="sizeAspect" aria-label="Querschnitt"></select>
+                      <span>R</span>
+                      <select id="sizeRim" aria-label="Felgengröße"></select>
+                      <input id="sizeSuffix" aria-label="Tragfähigkeits- und Geschwindigkeitsindex" placeholder="94W">
+                    </div>
+                    <div class="field tire-brand-inline">
+                      <label for="brand">Hersteller / Fabrikat</label>
+                      <input id="brand" placeholder="z. B. Michelin">
+                    </div>
                   </div>
                   <input id="size" type="hidden" value="">
                   <div class="mixed-size-toggle">
@@ -1873,23 +1880,21 @@ html,body{overflow-x:hidden;max-width:100vw}
                     </label>
                   </div>
                   <div id="secondSizeField" class="second-size-field">
-                    <div class="tire-size-builder">
-                      <select id="size2Width" aria-label="Zweite Reifenbreite"></select>
-                      <span>/</span>
-                      <select id="size2Aspect" aria-label="Zweiter Querschnitt"></select>
-                      <span>R</span>
-                      <select id="size2Rim" aria-label="Zweite Felgengröße"></select>
-                      <input id="size2Suffix" aria-label="Zweiter Tragfähigkeits- und Geschwindigkeitsindex" placeholder="99Y">
+                    <div class="tire-size-brand-row">
+                      <div class="tire-size-builder">
+                        <select id="size2Width" aria-label="Zweite Reifenbreite"></select>
+                        <span>/</span>
+                        <select id="size2Aspect" aria-label="Zweiter Querschnitt"></select>
+                        <span>R</span>
+                        <select id="size2Rim" aria-label="Zweite Felgengröße"></select>
+                        <input id="size2Suffix" aria-label="Zweiter Tragfähigkeits- und Geschwindigkeitsindex" placeholder="99Y">
+                      </div>
+                      <div class="field tire-brand-inline">
+                        <label for="brand2">Hersteller / Fabrikat</label>
+                        <input id="brand2" placeholder="z. B. Michelin">
+                      </div>
                     </div>
                     <input id="size2" type="hidden" value="">
-                    <div class="field mixed-brand-field">
-                      <label for="brand2">Hersteller / Fabrikat</label>
-                      <input id="brand2" placeholder="z. B. Michelin">
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label for="brand">Hersteller / Fabrikat</label>
-                    <input id="brand" placeholder="z. B. Michelin">
                   </div>
                 </div>
                 <div class="field full">
