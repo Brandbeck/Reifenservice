@@ -654,6 +654,14 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin:18px 0 30px}
   .window,.window2{left:39px;right:39px}
 }
 
+/* Modernes, übersichtliches Kunden-PDF */
+.customer-print-sheet{width:190mm;color:#172033;background:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:10px}
+.customer-print-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:7mm;border-bottom:2px solid #172033;margin-bottom:6mm}
+.customer-print-brand{display:flex;align-items:center;gap:7mm}.customer-print-brand .print-brand-logo{width:34mm;max-height:15mm;object-fit:contain;display:block}
+.customer-print-title{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#687588;font-weight:800;margin-bottom:1mm}.customer-print-name{font-size:22px;font-weight:900;line-height:1.05}
+.customer-print-number{min-width:28mm;text-align:right}.customer-print-number span{display:block;font-size:7.5px;text-transform:uppercase;letter-spacing:.08em;color:#687588;font-weight:800}.customer-print-number strong{display:block;font-size:15px;margin-top:1mm}
+.customer-print-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3mm;margin-bottom:6mm}.customer-print-summary>div{padding:3mm;background:#f5f7fa;border-radius:2mm}.customer-print-summary span,.customer-print-info-grid label,.customer-print-tire-grid label{display:block;font-size:7px;text-transform:uppercase;letter-spacing:.06em;color:#687588;font-weight:800;margin-bottom:1mm}.customer-print-summary strong{font-size:10px;line-height:1.2}.customer-print-section{margin-bottom:5mm}.customer-print-section h2{font-size:11px;margin:0 0 3mm;padding-bottom:1.5mm;border-bottom:1px solid #dce2e9;text-transform:uppercase;letter-spacing:.04em}.customer-print-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3mm 6mm}.customer-print-info-grid>div{min-width:0}.customer-print-info-grid .wide{grid-column:1/-1}.customer-print-info-grid strong{display:block;font-size:9.5px;min-height:5mm;padding-bottom:1.2mm;border-bottom:1px solid #edf0f3;white-space:pre-wrap;word-break:break-word}
+.customer-print-section-title{display:flex;align-items:end;justify-content:space-between;gap:4mm}.customer-print-section-title span{font-size:8px;color:#687588;font-weight:700;margin-bottom:3mm}.customer-print-tire{border:1px solid #dce2e9;border-radius:2.5mm;padding:3.5mm;margin-bottom:3mm;break-inside:avoid}.customer-print-tire-head{display:flex;justify-content:space-between;gap:5mm;align-items:center;padding-bottom:2.5mm;margin-bottom:3mm;border-bottom:1px solid #e6eaf0}.customer-print-tire-season{display:block;font-size:12px;font-weight:900}.customer-print-tire-sub{display:block;color:#687588;font-size:8px;margin-top:.8mm}.customer-print-status-wrap{text-align:right}.customer-print-status{font-size:9px;font-weight:900}.customer-print-status.ok{color:#177245}.customer-print-status.warn{color:#c62828}.customer-print-status-detail{display:block;font-size:7.5px;color:#c62828;margin-top:1mm}.customer-print-tire-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3mm 5mm}.customer-print-tire-grid strong{font-size:9px;display:block}.customer-print-tread{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2mm;margin-top:3mm;padding-top:2.5mm;border-top:1px solid #edf0f3;align-items:center}.customer-print-mini-title{font-size:7px;text-transform:uppercase;letter-spacing:.06em;color:#687588;font-weight:800}.customer-print-tread>div{display:flex;justify-content:space-between;gap:2mm;background:#f7f8fa;border-radius:1.5mm;padding:2mm}.customer-print-tread span{font-size:7px;color:#687588;font-weight:800}.customer-print-tread strong{font-size:8.5px}.customer-print-notes{border:1px solid #dce2e9;border-radius:2mm;padding:3mm;min-height:12mm;font-size:9px;white-space:pre-wrap}.customer-print-footer{margin-top:5mm;padding-top:2mm;border-top:1px solid #e3e7ec;text-align:right;color:#8a94a3;font-size:7.5px}
 @page{
   size:A4 portrait;
   margin:10mm;
@@ -2911,17 +2919,69 @@ function printCustomer(id){
   };
   const tireBlocks=seasonsToPrint.map(season=>{
     const t=sets[season] || blankTireSet();
-    return `<div class="print-tire-set"><div class="print-grid-full"><div class="field"><label>Reifenart</label><div class="print-value tire-season-print-value"><strong>${esc(season || "Reifenart nicht angegeben")}</strong></div></div></div><div class="print-grid-2" style="margin-top:8px"><div class="field"><label>Reifengröße ${t.size?"":'<span class="required-star">*</span>'}</label><div class="print-value ${t.size?"":"missing"}">${printText(t.size)}</div></div><div class="field"><label>Hersteller / Fabrikat</label><div class="print-value">${printText(t.brand)}</div></div></div><div class="print-grid-3" style="margin-top:10px"><div class="field"><label>Stück</label><div class="print-value">${printText(t.quantity)}</div></div><div class="field"><label>Reifenausführung ${t.tireConstruction?"":'<span class="required-star">*</span>'}</label><div class="print-value ${t.tireConstruction?"":"missing"}">${printText(t.tireConstruction)}</div></div><div class="field"><label>Felgenart</label><div class="print-value">${printText(rimLabel(t))}</div></div></div><div class="print-grid-2" style="margin-top:10px"><div class="field"><label>Anbaumaterial</label><div class="print-options">${printOption("Mit eingelagert",t.mounting==="Mit eingelagert")}${printOption("Im Fahrzeug",t.mounting==="Im Fahrzeug")}${printOption("Serie",t.mounting==="Serie")}</div></div><div class="field"><label>Radabdeckung</label><div class="print-value">${t.wheelCoverStored?"✓ Mit eingelagert":"Nicht eingelagert"}</div></div></div><div class="print-grid-full" style="margin-top:10px"><div class="field"><label>RDKS</label><div class="print-value">${c.rdks?("✓ Ja" + (c.rdksType ? " – " + esc(c.rdksType) : "")):"Nein"}</div></div><div class="field"><label>Waschen</label><div class="print-value">${t.wash?"✓ Waschen":"Nein"}</div></div><div class="field"><label>Lagerplatz</label><div class="print-value">${printText(c.storage)}</div></div></div><div class="section-label print-profile-title">Profiltiefe am Fahrzeug</div><div class="print-grid-4 tread-print-grid"><div class="field"><label>Vorne links</label><div class="print-value">${t.fl!==""&&t.fl!=null?esc(t.fl)+" mm":"—"}</div></div><div class="field"><label>Vorne rechts</label><div class="print-value">${t.fr!==""&&t.fr!=null?esc(t.fr)+" mm":"—"}</div></div><div class="field"><label>Hinten links</label><div class="print-value">${t.rl!==""&&t.rl!=null?esc(t.rl)+" mm":"—"}</div></div><div class="field"><label>Hinten rechts</label><div class="print-value">${t.rr!==""&&t.rr!=null?esc(t.rr)+" mm":"—"}</div></div></div>${lowHtml(season,t)}</div>`;
+    const threshold=season === "Sommerreifen" ? 3 : 4;
+    const positions=[["VL",t.fl,"Vorne links"],["VR",t.fr,"Vorne rechts"],["HL",t.rl,"Hinten links"],["HR",t.rr,"Hinten rechts"]];
+    const low=positions.filter(([,v])=>v!==""&&v!==null&&v!==undefined).filter(([,v])=>{const mm=Number(String(v).replace(",","."));return !Number.isNaN(mm)&&mm<=threshold;});
+    const status=low.length ? `<span class="customer-print-status warn">⚠ Neue Reifen</span><span class="customer-print-status-detail">${low.map(([,v,label])=>esc(label)).join(", ")}</span>` : `<span class="customer-print-status ok">✓ OK</span>`;
+    return `<div class="customer-print-tire">
+      <div class="customer-print-tire-head"><div><span class="customer-print-tire-season">${esc(season || "Reifenart nicht angegeben")}</span><span class="customer-print-tire-sub">${t.quantity ? esc(t.quantity)+" × " : ""}${esc(t.tireConstruction || "")}${rimLabel(t) ? " · "+esc(rimLabel(t)) : ""}</span></div><div class="customer-print-status-wrap">${status}</div></div>
+      <div class="customer-print-tire-grid">
+        <div><label>Hersteller</label><strong>${printText(t.brand)}</strong></div>
+        <div><label>Reifengröße</label><strong>${printText(t.size)}</strong></div>
+        <div><label>Anbaumaterial</label><strong>${printText(t.mounting)}</strong></div>
+        <div><label>Radabdeckung</label><strong>${t.wheelCoverStored ? "✓ Mit eingelagert" : "Nicht eingelagert"}</strong></div>
+        <div><label>Waschen</label><strong>${t.wash ? "✓ Ja" : "Nein"}</strong></div>
+        <div><label>Wechseltermin</label><strong>${c.changeAppointment ? esc(formatDate(c.changeAppointment)) : "—"}</strong></div>
+      </div>
+      <div class="customer-print-tread"><span class="customer-print-mini-title">Profiltiefe</span>${positions.map(([short,v,label])=>`<div><span>${short}</span><strong>${v!==""&&v!=null?esc(v)+" mm":"—"}</strong></div>`).join("")}</div>
+    </div>`;
   }).join("");
   $("printSheet").className="";
   const printLogoSrc = document.querySelector(".auth-brand .logo")?.src || "";
   const printLogo = printLogoSrc ? `<img class="print-brand-logo" src="${printLogoSrc}" alt="PBT Racing">` : "";
-  $("printSheet").innerHTML=`<div class="print-sheet"><div class="print-like-head"><div>${printLogo}</div><h2>${printText(c.firstName)} ${printText(c.lastName)}</h2><div class="print-like-date">Kunden-Nr.: <strong>${printText(c.customerNumber)}</strong></div></div>
-  <div class="form-section"><div class="form-section-head"><div class="section-icon">👤</div><h3>Kundendaten</h3></div><div class="form-section-body"><div class="print-grid-3 customer-print-top"><div class="field"><label>Vorname ${c.firstName?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.firstName?"":"missing"}">${printText(c.firstName)}</div></div><div class="field"><label>Nachname ${c.lastName?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.lastName?"":"missing"}">${printText(c.lastName)}</div></div><div class="field"><label>Kunden-Nr.</label><div class="print-value">${printText(c.customerNumber)}</div></div></div><div class="print-grid-full" style="margin-top:8px"><div class="field"><label>Anschrift</label><div class="print-value">${printText(c.address)}</div></div></div><div class="print-grid-2" style="margin-top:8px"><div class="field"><label>Telefon</label><div class="print-value">${printText(c.phone)}</div></div><div class="field"><label>E-Mail-Adresse</label><div class="print-value">${printText(c.email)}</div></div></div></div></div>
-  <div class="form-section"><div class="form-section-head"><div class="section-icon">🚗</div><h3>Fahrzeugdaten</h3></div><div class="form-section-body"><div class="print-grid-2"><div class="field"><label>Kfz-Kennzeichen ${c.licensePlate?"":'<span class="required-star">*</span>'}</label><div class="print-value ${c.licensePlate?"":"missing"}">${printText(c.licensePlate)}</div></div><div class="field"><label>Kilometerstand</label><div class="print-value">${c.mileage?esc(c.mileage)+" km":"—"}</div></div></div><div class="print-grid-3" style="margin-top:10px"><div class="field"><label>Fahrzeughersteller</label><div class="print-value">${printText(c.vehicleManufacturer)}</div></div><div class="field"><label>Fahrzeugtyp / Modell</label><div class="print-value">${printText(c.vehicleModel)}</div></div><div class="field"><label>PKW-Art / Fahrzeugklasse</label><div class="print-value">${printText(c.vehicleType)}</div></div></div></div></div>
-  <div class="form-section"><div class="form-section-head"><div class="section-icon">🛞</div><h3>Reifendaten</h3></div><div class="form-section-body">${tireBlocks}</div></div>
-  <div class="form-section"><div class="form-section-head"><div class="section-icon">📝</div><h3>Bemerkungen</h3></div><div class="form-section-body"><div class="print-value note-value">${printText(c.notes)}</div></div></div>
-  ${missing.length?`<div class="print-missing-note">⚠ Angaben noch nicht vollständig. Fehlt: ${missing.map(esc).join(", ")}</div>`:""}
+  const fullName = `${c.lastName || ""}${c.lastName && c.firstName ? ", " : ""}${c.firstName || ""}`.trim() || "Kunde";
+  $("printSheet").innerHTML=`<div class="print-sheet customer-print-sheet">
+    <header class="customer-print-header">
+      <div class="customer-print-brand">${printLogo}<div><div class="customer-print-title">Kundenblatt</div><div class="customer-print-name">${printText(fullName)}</div></div></div>
+      <div class="customer-print-number"><span>Kunden-Nr.</span><strong>${printText(c.customerNumber)}</strong></div>
+    </header>
+
+    <div class="customer-print-summary">
+      <div><span>🚗 Kfz-Kennzeichen</span><strong>${printText(c.licensePlate)}</strong></div>
+      <div><span>📍 Lagerplatz</span><strong>${printText(c.storage)}</strong></div>
+      <div><span>🔧 Fahrzeug</span><strong>${printText(c.vehicleManufacturer)}${c.vehicleModel ? " · "+esc(c.vehicleModel) : ""}</strong></div>
+      <div><span>📅 Wechseltermin</span><strong>${c.changeAppointment ? esc(formatDate(c.changeAppointment)) : "—"}</strong></div>
+    </div>
+
+    <section class="customer-print-section">
+      <h2>Kundendaten</h2>
+      <div class="customer-print-info-grid">
+        <div><label>Vorname</label><strong>${printText(c.firstName)}</strong></div>
+        <div><label>Nachname</label><strong>${printText(c.lastName)}</strong></div>
+        <div class="wide"><label>Anschrift</label><strong>${printText(c.address)}</strong></div>
+        <div><label>Telefon</label><strong>${printText(c.phone)}</strong></div>
+        <div><label>E-Mail-Adresse</label><strong>${printText(c.email)}</strong></div>
+      </div>
+    </section>
+
+    <section class="customer-print-section">
+      <h2>Fahrzeugdaten</h2>
+      <div class="customer-print-info-grid">
+        <div><label>Fahrzeugklasse</label><strong>${printText(c.vehicleType)}</strong></div>
+        <div><label>Kilometerstand</label><strong>${c.mileage ? esc(c.mileage)+" km" : "—"}</strong></div>
+        <div><label>RDKS</label><strong>${c.rdks ? "✓ Ja"+(c.rdksType ? " · "+esc(c.rdksType) : "") : "Nein"}</strong></div>
+        <div><label>Eintrag erstellt am</label><strong>${printText(c.createdAt)}</strong></div>
+      </div>
+    </section>
+
+    <section class="customer-print-section customer-print-tires-section">
+      <div class="customer-print-section-title"><h2>Reifendaten</h2><span>${seasons.length} ${seasons.length === 1 ? "Reifensatz" : "Reifensätze"}</span></div>
+      ${tireBlocks}
+    </section>
+
+    ${c.notes ? `<section class="customer-print-section"><h2>Bemerkungen</h2><div class="customer-print-notes">${printText(c.notes)}</div></section>` : ""}
+    ${missing.length?`<div class="print-missing-note">⚠ Angaben noch nicht vollständig. Fehlt: ${missing.map(esc).join(", ")}</div>`:""}
+    <div class="customer-print-footer">PBT Racing · Reifenservice</div>
   </div>`;
   openPrintSheetWindow("printing", `Reifenservice – ${c.lastName || "Kunde"}, ${c.firstName || ""}`, "size:A4 portrait; margin:10mm;");
 }
