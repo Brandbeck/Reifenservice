@@ -2444,17 +2444,13 @@ function tireStatus(c, season){
   const t = getTireSet(c, useSeason);
   if(!t || !useSeason) return '<span class="status-missing">—</span>';
   const positions = [["Vorne links", t.fl],["Vorne rechts", t.fr],["Hinten links", t.rl],["Hinten rechts", t.rr]];
-  // Wenn keine Profiltiefe eingetragen ist, wird der Satz als OK angezeigt.
-  const complete = positions.every(([,value]) => {
-    if(value === "" || value === null || value === undefined) return false;
-    const mm = Number(String(value).replace(",", "."));
-    return !Number.isNaN(mm);
-  });
-  if(!complete) return '<span class="status-ok">✓ OK</span>';
+  // Leere Profiltiefen gelten als OK. Eingetragene Werte werden einzeln gegen
+  // den saisonabhängigen Grenzwert geprüft.
   const threshold = useSeason === "Sommerreifen" ? 3 : 4;
   const low = positions.filter(([,value]) => {
+    if(value === "" || value === null || value === undefined) return false;
     const mm = Number(String(value).replace(",", "."));
-    return mm <= threshold;
+    return !Number.isNaN(mm) && mm <= threshold;
   }).map(([label]) => label);
   if(!low.length) return '<span class="status-ok">✓ OK</span>';
   return `<div class="status-warn"><span class="status-title">⚠ Neue Reifen</span><div class="status-locations">${low.map(esc).join("<br>")}</div></div>`;
@@ -3021,9 +3017,12 @@ function printCustomer(id){
     const t=sets[season] || blankTireSet();
     const threshold=season === "Sommerreifen" ? 3 : 4;
     const positions=[["VL",t.fl,"Vorne links"],["VR",t.fr,"Vorne rechts"],["HL",t.rl,"Hinten links"],["HR",t.rr,"Hinten rechts"]];
-    const complete=positions.every(([,v])=>v!==""&&v!==null&&v!==undefined&&!Number.isNaN(Number(String(v).replace(",","."))));
-    const low=complete ? positions.filter(([,v])=>{const mm=Number(String(v).replace(",","."));return mm<=threshold;}) : [];
-    const status=!complete ? `<span class="customer-print-status ok">✓ OK</span>` : (low.length ? `<span class="customer-print-status warn">⚠ Neue Reifen</span><span class="customer-print-status-detail">${low.map(([,v,label])=>esc(label)).join(", ")}</span>` : `<span class="customer-print-status ok">✓ OK</span>`);
+    const low=positions.filter(([,v])=>{
+      if(v===""||v===null||v===undefined) return false;
+      const mm=Number(String(v).replace(",","."));
+      return !Number.isNaN(mm) && mm<=threshold;
+    });
+    const status=low.length ? `<span class="customer-print-status warn">⚠ Neue Reifen</span><span class="customer-print-status-detail">${low.map(([,v,label])=>esc(label)).join(", ")}</span>` : `<span class="customer-print-status ok">✓ OK</span>`);
     return `<div class="customer-print-tire">
       <div class="customer-print-tire-head"><div><span class="customer-print-tire-season">${esc(season || "Reifenart nicht angegeben")}</span><span class="customer-print-tire-sub">${t.quantity ? esc(t.quantity)+" × " : ""}${esc(t.tireConstruction || "")}${rimLabel(t) ? " · "+esc(rimLabel(t)) : ""}</span></div><div class="customer-print-status-wrap">${status}</div></div>
       <div class="customer-print-tire-grid">
