@@ -818,7 +818,10 @@ body.printing-backup #printSheet{
 /* Druckansicht / Listenexport */
 @page listLandscape{
   size:A4 landscape;
-  margin:10mm;
+  margin:8mm;
+}
+body.printing-list{
+  page:listLandscape;
 }
 body.printing-list .page,
 body.printing-list .modal{
@@ -829,13 +832,13 @@ body.printing-list #printSheet{
 }
 #printSheet.list-mode{
   page:listLandscape;
-  width:277mm;
+  width:100%;
   color:#172033;
   background:#fff;
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 .list-print-sheet{
-  width:277mm;
+  width:100%;
   color:#172033;
   background:#fff;
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -872,13 +875,13 @@ body.printing-list #printSheet{
 }
 .list-print-table th,
 .list-print-table td{
-  padding:6px 7px;
+  padding:5px 6px;
   border-bottom:1px solid #d9e0e8;
   vertical-align:top;
   text-align:left;
 }
 .list-print-table th{
-  font-size:8.5px;
+  font-size:8px;
   text-transform:uppercase;
   letter-spacing:.04em;
   color:#687588;
@@ -1239,6 +1242,155 @@ body:not(.authenticated) .page{display:none}
   .brand-header{flex-direction:column;}
   .brand-status{width:100%;flex-direction:row;justify-content:space-between;align-items:center;}
   .brand-lockup{width:100%;}
+}
+
+
+
+/* Responsive layout: desktop, iPad landscape and phone portrait */
+@media (min-width:801px) and (max-width:1100px){
+  .page{width:100%;margin:12px auto}
+  .brand-header{padding:15px 16px;gap:14px}
+  .brand-logo-wrap{width:98px;min-width:98px;height:62px}
+  .brand-logo-wrap img{width:90px}
+  .brand-copy h1{font-size:25px}
+  .brand-copy .subtitle{font-size:12px}
+  .controls{padding:13px 14px;grid-template-columns:minmax(0,1.1fr) minmax(0,1.1fr) 180px auto;gap:9px}
+  .status-filter.show{grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));}
+  .tablewrap{overflow-x:hidden}
+  table{min-width:0;table-layout:fixed}
+  th,td{padding:10px 7px}
+  th{font-size:9px;line-height:1.2}
+  td{font-size:12px;line-height:1.25}
+  th:nth-child(1),td:nth-child(1){width:6%}
+  th:nth-child(2),td:nth-child(2){width:17%}
+  th:nth-child(3),td:nth-child(3){width:10%}
+  th:nth-child(4),td:nth-child(4){width:10%}
+  th:nth-child(5),td:nth-child(5){width:8%}
+  th:nth-child(6),td:nth-child(6){width:17%}
+  th:nth-child(7),td:nth-child(7){width:8%}
+  th:nth-child(8),td:nth-child(8){width:8%}
+  th:nth-child(9),td:nth-child(9){width:9%}
+  th:nth-child(10),td:nth-child(10){width:7%}
+  .tire-brand,.tire-size,.tire-season-pill{white-space:normal}
+  .tire-brand{font-size:10px}
+  .tire-size{font-size:10px}
+  .pill,.status-ok,.status-warn .status-title{font-size:9px;padding:4px 6px}
+  .status-warn .status-locations{font-size:9px}
+  .meta{font-size:10px}
+  .pdfBtn{padding:8px 8px;font-size:10px}
+  .order-summary{margin:0 14px 14px;padding:12px 13px}
+}
+
+@media (max-width:700px){
+  .page{width:100%;margin:8px 0}
+  .brand-header{border-radius:14px;padding:12px;gap:10px;margin:0 8px 12px}
+  .brand-lockup{gap:10px}
+  .brand-logo-wrap{width:72px;min-width:72px;height:46px;border-radius:10px}
+  .brand-logo-wrap img{width:66px}
+  .brand-copy h1{font-size:20px}
+  .brand-copy .subtitle{font-size:11px;margin-top:4px}
+  .header{gap:10px}
+  .card{border-radius:14px;margin:0 8px 12px}
+  .card-head{padding:14px 14px 12px}
+  .card-head h2{font-size:16px}
+  .card-head p{font-size:11px}
+  .controls{padding:12px 12px;grid-template-columns:1fr;gap:9px}
+  .status-filter.show{grid-template-columns:1fr;gap:8px;padding:9px}
+  .status-filter{grid-column:1/-1}
+  .actions{width:100%}
+  .actions .btn{width:100%}
+  .order-summary{margin:0 12px 12px;padding:11px 12px}
+  .order-summary-head{align-items:flex-start;flex-direction:column;gap:4px}
+  .order-summary-table{table-layout:fixed}
+  .order-summary-table th,.order-summary-table td{padding:6px 5px;font-size:10px}
+  .order-summary-table th{font-size:8px}
+
+  .tablewrap{overflow-x:hidden;padding:0 10px 10px}
+  table, table tbody{display:block;width:100%;min-width:0}
+  table thead{display:none}
+  table tbody tr{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0 8px;
+    margin:0 0 10px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:13px;
+    background:#fff;
+    box-shadow:0 4px 14px rgba(24,39,58,.05);
+  }
+  table tbody tr:hover{background:#fff}
+  table tbody td{
+    width:auto !important;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    gap:3px;
+    padding:9px 4px;
+    border-bottom:1px solid #edf1f5;
+    font-size:12px;
+    overflow-wrap:anywhere;
+  }
+  table tbody td::before{
+    content:"";
+    display:block;
+    font-size:9px;
+    line-height:1.15;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--muted);
+    font-weight:900;
+  }
+  table tbody td:nth-child(1)::before{content:"Kunden-Nr."}
+  table tbody td:nth-child(2)::before{content:"Kunde"}
+  table tbody td:nth-child(3)::before{content:"Kfz-Kennzeichen"}
+  table tbody td:nth-child(4)::before{content:"Reifenart"}
+  table tbody td:nth-child(5)::before{content:"PKW-Art"}
+  table tbody td:nth-child(6)::before{content:"Hersteller / Größe"}
+  table tbody td:nth-child(7)::before{content:"Lagerplatz"}
+  table tbody td:nth-child(8)::before{content:"Wechseltermin"}
+  table tbody td:nth-child(9)::before{content:"Reifenstatus"}
+  table tbody td:nth-child(10)::before{content:"Aktion"}
+  table tbody td:nth-child(2),
+  table tbody td:nth-child(6),
+  table tbody td:nth-child(9),
+  table tbody td:nth-child(10){grid-column:1/-1}
+  table tbody td:last-child{border-bottom:0;padding-top:8px}
+  table tbody td:nth-child(10){align-items:stretch}
+  table tbody td:nth-child(10) .pdfBtn{width:100%;justify-content:center}
+  table tbody .name{font-size:14px}
+  table tbody .meta{font-size:10px}
+  .tire-brand,.tire-size,.tire-season-pill{white-space:normal}
+  .tire-brand{font-size:11px}
+  .tire-size{font-size:10px}
+  .pill,.status-ok,.status-warn .status-title{font-size:10px;padding:4px 7px}
+  .status-warn .status-locations{font-size:10px}
+  .appointment-pill{font-size:10px;padding:4px 7px;white-space:normal}
+
+  .modal{padding:8px}
+  .modal-box{width:100%;max-height:94vh;border-radius:15px}
+  .modal-head{padding:14px 15px}
+  .modal-content{padding:12px}
+  .form-section-body{padding:11px}
+  .field label{font-size:11px}
+  input,select,textarea{padding:10px 10px;border-radius:9px}
+  .customer-top{grid-template-columns:1fr !important}
+  .detail{grid-template-columns:1fr}
+}
+
+@media (max-width:520px){
+  .brand-header{flex-direction:column;align-items:stretch}
+  .brand-status{width:100%;flex-direction:row;justify-content:space-between;align-items:center}
+  .brand-lockup{width:100%}
+  .brand-copy h1{font-size:18px}
+  .car-grid{grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr);gap:9px}
+  .car{width:112px;height:230px}
+  .window,.window2{left:31px;right:31px;height:54px}
+  .wheel{width:22px;height:56px}
+  .wfl,.wfr{top:38px}.whl,.whr{bottom:38px}
+  .direction{font-size:9px}
+  .tirebox .pos{font-size:10px}
 }
 
 </style>
@@ -2214,7 +2366,7 @@ function printCustomerList(){
   };
   $("printSheet").className="list-mode";
   $("printSheet").innerHTML=`<div class="list-print-sheet"><div class="list-print-head"><div><h2>Reifenservice – Kundenliste</h2><div class="list-print-subtitle">${filterText}</div></div><div class="list-print-meta">${list.length} ${list.length===1?"Kunde":"Kunden"}<br>Erstellt am: ${formatDate(todayISO())}</div></div>
-  <table class="list-print-table"><colgroup><col style="width:8%"><col style="width:18%"><col style="width:10%"><col style="width:11%"><col style="width:10%"><col style="width:18%"><col style="width:8%"><col style="width:7%"><col style="width:10%"></colgroup><thead><tr><th>Kunden-Nr.</th><th>Kunde</th><th>Kfz-Kennzeichen</th><th>Reifenart</th><th>PKW-Art</th><th>Hersteller / Größe</th><th>Lagerplatz</th><th>Wechseltermin</th><th>Reifenstatus</th></tr></thead><tbody>${list.map(c=>{const season=selectedSeason||firstStoredSeason(c);const t=getTireSet(c,season)||blankTireSet();return `<tr><td>${printText(c.customerNumber)}</td><td><div class="strong">${printText(c.firstName)} ${printText(c.lastName)}</div></td><td>${printText(c.licensePlate)}</td><td><div class="strong">${t.quantity?esc(t.quantity)+" × ":""}${printText(season)}</div></td><td>${printText(c.vehicleType)}</td><td><div class="strong">${printText(t.brand)}</div><div class="muted">${printText(t.size)}</div></td><td>${printText(c.storage)}</td><td>${c.changeAppointment?printText(formatDate(c.changeAppointment)):"—"}</td><td>${statusText(c)}</td></tr>`;}).join("")}</tbody></table></div>`;
+  <table class="list-print-table"><colgroup><col style="width:7%"><col style="width:18%"><col style="width:10%"><col style="width:11%"><col style="width:9%"><col style="width:20%"><col style="width:8%"><col style="width:8%"><col style="width:9%"></colgroup><thead><tr><th>Kunden-Nr.</th><th>Kunde</th><th>Kfz-Kennzeichen</th><th>Reifenart</th><th>PKW-Art</th><th>Hersteller / Größe</th><th>Lagerplatz</th><th>Wechseltermin</th><th>Reifenstatus</th></tr></thead><tbody>${list.map(c=>{const season=selectedSeason||firstStoredSeason(c);const t=getTireSet(c,season)||blankTireSet();return `<tr><td>${printText(c.customerNumber)}</td><td><div class="strong">${printText(c.firstName)} ${printText(c.lastName)}</div></td><td>${printText(c.licensePlate)}</td><td><div class="strong">${t.quantity?esc(t.quantity)+" × ":""}${printText(season)}</div></td><td>${printText(c.vehicleType)}</td><td><div class="strong">${printText(t.brand)}</div><div class="muted">${printText(t.size)}</div></td><td>${printText(c.storage)}</td><td>${c.changeAppointment?printText(formatDate(c.changeAppointment)):"—"}</td><td>${statusText(c)}</td></tr>`;}).join("")}</tbody></table></div>`;
   document.body.classList.add("printing-list");
   setTimeout(()=>window.print(),80);
 }
