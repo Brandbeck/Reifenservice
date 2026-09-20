@@ -1882,8 +1882,12 @@ html,body{overflow-x:hidden;max-width:100vw}
                       <input id="size2Suffix" aria-label="Zweiter Tragfähigkeits- und Geschwindigkeitsindex" placeholder="99Y">
                     </div>
                     <input id="size2" type="hidden" value="">
+                    <div class="field mixed-brand-field">
+                      <label for="brand2">Hersteller / Fabrikat</label>
+                      <input id="brand2" placeholder="z. B. Michelin">
+                    </div>
                   </div>
-                  <div class="field mixed-brand-field">
+                  <div class="field">
                     <label for="brand">Hersteller / Fabrikat</label>
                     <input id="brand" placeholder="z. B. Michelin">
                   </div>
@@ -2208,6 +2212,7 @@ function normalizeTireSet(value){
     size2: src.size2 ?? "",
     mixedTireSize: !!src.mixedTireSize,
     brand: src.brand ?? "",
+    brand2: src.brand2 ?? "",
     quantity: src.quantity ?? "",
     tireConstruction: src.tireConstruction ?? "",
     rimType: src.rimType ?? "",
@@ -2318,6 +2323,7 @@ function readTireFields(){
     size2: syncTireSize2(),
     mixedTireSize: $("mixedTireSize").checked,
     brand: $("brand").value.trim(),
+    brand2: $("brand2").value.trim(),
     quantity: $("quantity").value,
     tireConstruction: document.querySelector('input[name="tireConstruction"]:checked')?.value || "",
     rimType: document.querySelector('input[name="rimType"]:checked')?.value || "",
@@ -2337,6 +2343,7 @@ function writeTireFields(data){
   $("mixedTireSize").checked = !!t.mixedTireSize;
   updateSecondSizeVisibility();
   $("brand").value = t.brand;
+  $("brand2").value = t.brand2;
   $("quantity").value = t.quantity;
   document.querySelectorAll('input[name="tireConstruction"]').forEach(r => r.checked = r.value === t.tireConstruction);
   document.querySelectorAll('input[name="rimType"]').forEach(r => r.checked = r.value === t.rimType);
@@ -2350,7 +2357,7 @@ function writeTireFields(data){
   updateRimTypeField();
 }
 function setTireInputsEnabled(enabled){
-  ["sizeWidth","sizeAspect","sizeRim","sizeSuffix","size2Width","size2Aspect","size2Rim","size2Suffix","mixedTireSize","brand","quantity","wash","fl","fr","rl","rr"].forEach(id => {
+  ["sizeWidth","sizeAspect","sizeRim","sizeSuffix","size2Width","size2Aspect","size2Rim","size2Suffix","mixedTireSize","brand","brand2","quantity","wash","fl","fr","rl","rr"].forEach(id => {
     const el = $(id);
     if(el) el.disabled = !enabled;
   });
@@ -3240,7 +3247,7 @@ document.querySelectorAll('input[name="season"]').forEach(r=>r.addEventListener(
   updateCompletenessNotice();
 }));
 document.querySelectorAll('input[name="tireConstruction"]').forEach(r=>r.addEventListener("change",()=>{updateRimTypeField();updateCompletenessNotice();}));
-["sizeWidth","sizeAspect","sizeRim","sizeSuffix","brand","quantity","wash","fl","fr","rl","rr"].forEach(id=>$(id).addEventListener("input",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
+["sizeWidth","sizeAspect","sizeRim","sizeSuffix","brand","brand2","quantity","wash","fl","fr","rl","rr"].forEach(id=>$(id).addEventListener("input",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
 ["sizeWidth","sizeAspect","sizeRim"].forEach(id=>$(id).addEventListener("change",()=>{syncTireSize();if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
 document.querySelectorAll('input[name="tireConstruction"],input[name="rimType"],input[name="mounting"]').forEach(r=>r.addEventListener("change",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();updateCompletenessNotice();}));
 $("wheelCoverStored").addEventListener("change",()=>{if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields();});
