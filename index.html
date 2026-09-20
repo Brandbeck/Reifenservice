@@ -2259,13 +2259,13 @@ function populateTireSizeSelectors(){
   add(width,'','—'); for(let v=145;v<=325;v+=5) add(width,v);
   add(aspect,'','—'); for(let v=25;v<=85;v+=5) add(aspect,v);
   add(rim,'','—'); for(let v=12;v<=24;v++) add(rim,v);
-}
   const width2=$("size2Width"), aspect2=$("size2Aspect"), rim2=$("size2Rim");
   if(width2 && aspect2 && rim2){
     add(width2,'','—'); for(let v=145;v<=325;v+=5) add(width2,v);
     add(aspect2,'','—'); for(let v=25;v<=85;v+=5) add(aspect2,v);
     add(rim2,'','—'); for(let v=12;v<=24;v++) add(rim2,v);
   }
+}
 function parseTireSize(value){
   const raw=String(value||'').trim();
   const m=raw.match(/^(\d{3})\/(\d{2})\s*R(\d{2})(?:\s+(.*))?$/i);
