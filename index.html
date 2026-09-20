@@ -1621,7 +1621,8 @@ body:not(.authenticated) .page{display:none}
                 </div>
                 <div class="field">
                   <label for="vehicleManufacturer">Fahrzeughersteller</label>
-                  <input id="vehicleManufacturer" type="text" placeholder="z. B. Mercedes-Benz">
+                  <input id="vehicleManufacturer" type="text" list="vehicleManufacturerOptions" placeholder="z. B. Mercedes-Benz" autocomplete="off">
+                  <datalist id="vehicleManufacturerOptions"></datalist>
                 </div>
                 <div class="field">
                   <label for="vehicleModel">Fahrzeugtyp / Modell</label>
@@ -1852,6 +1853,16 @@ let supabaseClient = null;
 
 const $ = id => document.getElementById(id);
 
+function refreshVehicleManufacturerOptions(){
+  const list = $("vehicleManufacturerOptions");
+  if(!list) return;
+  const manufacturers = [...new Set(customers
+    .map(c => String(c?.vehicleManufacturer || "").trim())
+    .filter(Boolean))]
+    .sort((a,b) => a.localeCompare(b, "de", { sensitivity:"base" }));
+  list.innerHTML = manufacturers.map(name => `<option value="${esc(name)}"></option>`).join("");
+}
+
 function showDbWarning(message){
   const box = $("dbWarning");
   if(!box) return;
@@ -1929,6 +1940,7 @@ async function loadFromSupabase(){
   }
 
   customers = remote;
+  refreshVehicleManufacturerOptions();
   render();
   return true;
 }
@@ -1949,6 +1961,7 @@ async function upsertCustomer(item){
   }
   databaseAvailable = true;
   showDbWarning("");
+  refreshVehicleManufacturerOptions();
   return true;
 }
 
@@ -2620,6 +2633,7 @@ $("customerForm").addEventListener("submit",async e=>{
   const ok = await upsertCustomer(item);
   if(!ok) return;
   if(editingId) customers=customers.map(c=>c.id===editingId?item:c); else customers.push(item);
+  refreshVehicleManufacturerOptions();
   render();
   closeModal();
 });
