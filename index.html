@@ -354,7 +354,7 @@ input:focus,select:focus,textarea:focus{
 .calendar-day.other-month .calendar-day-number{color:#a4afbc}.calendar-day-number .today-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:block}
 .calendar-event{display:block;width:100%;margin:0 0 4px;padding:5px 6px;border:1px solid #d6e0ff;border-radius:7px;background:#eef3ff;color:#2349a5;text-align:left;cursor:pointer;overflow:hidden}
 .calendar-event:hover{background:#e4ecff}.calendar-event-name{display:block;font-size:10px;line-height:1.2;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.calendar-event-meta{display:block;margin-top:2px;color:#53698f;font-size:9px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calendar-event-meta{display:block;margin-top:2px;color:#53698f;font-size:9px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.calendar-event-season{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .calendar-event-season{display:inline-block;margin-top:3px;font-size:8px;font-weight:900;color:#1748c7}.calendar-more{color:var(--muted);font-size:9px;font-weight:800;padding:2px 4px}
 .calendar-legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:0 14px 14px;color:var(--muted);font-size:11px}
 .calendar-legend span{display:inline-flex;align-items:center;gap:5px}.calendar-legend i{width:9px;height:9px;border-radius:3px;background:#eef3ff;border:1px solid #d6e0ff}
@@ -2522,7 +2522,7 @@ function getCalendarEvents(){
     const date = calendarDateFromISO(c.changeAppointment);
     if(!date) return null;
     const season = c.storedSeason || c.season || firstStoredSeason(c) || "";
-    return {id:c.id,dateKey:calendarDateKey(date),firstName:c.firstName||"",lastName:c.lastName||"",licensePlate:c.licensePlate||"",season};
+    return {id:c.id,dateKey:calendarDateKey(date),firstName:c.firstName||"",lastName:c.lastName||"",licensePlate:c.licensePlate||"",storage:c.storage||"",season};
   }).filter(Boolean).sort((a,b)=>{
     const na=`${a.lastName} ${a.firstName}`.trim(), nb=`${b.lastName} ${b.firstName}`.trim();
     return na.localeCompare(nb,"de");
@@ -2545,10 +2545,11 @@ function renderCalendar(){
       <div class="calendar-day-number"><span>${date.getDate()}</span>${isToday?'<span class="today-dot" aria-label="Heute"></span>':""}</div>`;
     dayEvents.slice(0,3).forEach(ev=>{
       const name=`${ev.firstName} ${ev.lastName}`.trim()||"Unbekannter Kunde";
-      html+=`<button type="button" class="calendar-event" data-customer-id="${esc(ev.id)}" title="${esc(name)} – ${esc(ev.licensePlate||"Kein Kennzeichen")}">
+      html+=`<button type="button" class="calendar-event" data-customer-id="${esc(ev.id)}" title="${esc(name)} – ${esc(ev.licensePlate||"Kein Kennzeichen")} – ${esc(ev.storage||"Kein Lagerort")} – ${esc(ev.season||"Keine Reifenart")}">
         <span class="calendar-event-name">${esc(name)}</span>
-        <span class="calendar-event-meta">${esc(ev.licensePlate||"Kein Kennzeichen")}</span>
-        ${ev.season?`<span class="calendar-event-season">${esc(ev.season.replace("reifen",""))}</span>`:""}
+        <span class="calendar-event-meta">🚗 ${esc(ev.licensePlate||"Kein Kennzeichen")}</span>
+        <span class="calendar-event-meta">📍 ${esc(ev.storage||"Kein Lagerort")}</span>
+        ${ev.season?`<span class="calendar-event-season">🛞 ${esc(ev.season.replace("reifen",""))}</span>`:`<span class="calendar-event-season">🛞 Reifenart nicht angegeben</span>`}
       </button>`;
     });
     if(dayEvents.length>3) html+=`<div class="calendar-more">+ ${dayEvents.length-3} weitere</div>`;
@@ -2586,7 +2587,7 @@ function render(){
     const incomplete = customerIncomplete(c);
     return `<tr data-id="${c.id}" class="${incomplete ? "customer-incomplete" : ""}">
       <td><span class="pill">${esc(c.customerNumber || "—")}</span></td>
-      <td><div class="name">${esc(c.firstName)} ${esc(c.lastName)}</div><div class="meta">${esc(c.phone || "Keine Telefonnummer")}</div>${c.email ? `<div class="meta">${esc(c.email)}</div>` : ""}${incomplete ? `<div class="overview-warning">⚠ Angaben unvollständig<div class="meta">Fehlt: ${missingImportantFields(c).map(esc).join(", ")}</div></div>` : ""}</td>
+      <td><div class="name">${esc(c.lastName)}${c.lastName && c.firstName ? ", " : ""}${esc(c.firstName)}</div><div class="meta">${esc(c.phone || "Keine Telefonnummer")}</div>${c.email ? `<div class="meta">${esc(c.email)}</div>` : ""}${incomplete ? `<div class="overview-warning">⚠ Angaben unvollständig<div class="meta">Fehlt: ${missingImportantFields(c).map(esc).join(", ")}</div></div>` : ""}</td>
       <td><span class="pill plate-pill">${esc(c.licensePlate || "—")}</span></td>
       <td><span class="pill tire-season-pill">${t.quantity ? esc(t.quantity) + " × " : ""}${esc(useSeason || "Nicht angegeben")}</span>${t.tireConstruction ? `<div class="meta">${esc(t.tireConstruction)}</div>` : ""}</td>
       <td><span class="pill">${esc(c.vehicleType || "—")}</span></td>
