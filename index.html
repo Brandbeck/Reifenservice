@@ -2724,7 +2724,7 @@ function initializeCustomerColumnResizers(force=false){
 
 let calendarDate = new Date();
 calendarDate.setDate(1);
-let preparationDate = new Date();
+let preparationDate = nextWorkday(new Date(),1);
 
 function calendarDateKey(date){
   const y = date.getFullYear();
