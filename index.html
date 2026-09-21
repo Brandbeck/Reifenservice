@@ -380,6 +380,7 @@ input:focus,select:focus,textarea:focus{
 .calendar-legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:0 14px 14px;color:var(--muted);font-size:11px}
 .calendar-legend span{display:inline-flex;align-items:center;gap:5px}.calendar-legend i{width:9px;height:9px;border-radius:3px;background:#eef3ff;border:1px solid #d6e0ff}
 .calendar-count{padding:7px 10px;border-radius:999px;background:#eef3ff;color:var(--accent);font-size:11px;font-weight:900;white-space:nowrap}
+.preparation-card{overflow:hidden}.preparation-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fbfdff 0%,#f7faff 100%)}.preparation-title-wrap{min-width:0}.preparation-kicker{display:inline-flex;align-items:center;margin-bottom:5px;padding:5px 9px;border-radius:999px;background:#eef3ff;color:var(--accent);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.preparation-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.preparation-datebar{display:flex;align-items:center;justify-content:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--line);background:#fff}.preparation-date{min-width:250px;text-align:center;font-size:18px;font-weight:950;color:#172033;text-transform:capitalize}.preparation-list-wrap{padding:0 22px 22px}.preparation-list-head,.preparation-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(150px,.8fr) minmax(150px,.8fr);gap:16px;align-items:center}.preparation-list-head{padding:13px 14px 9px;color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.preparation-row{padding:15px 14px;border-top:1px solid var(--line);background:#fff}.preparation-row:hover{background:#f8faff}.preparation-name{font-size:15px;font-weight:900;color:#172033}.preparation-plate{font-size:14px;font-weight:900;color:#172033;white-space:nowrap}.preparation-storage{font-size:14px;font-weight:800;color:#344252}.preparation-row button{border:0;background:transparent;padding:0;text-align:left;cursor:pointer}.preparation-empty{margin:0 22px 22px;border:1px solid var(--line);border-radius:14px;background:#fafbfd}@media(max-width:800px){.preparation-head{align-items:flex-start;flex-direction:column}.preparation-actions{width:100%;justify-content:flex-start}.preparation-datebar{padding:12px 14px}.preparation-list-wrap{padding:0 14px 16px}.preparation-list-head,.preparation-row{grid-template-columns:minmax(0,1.25fr) minmax(105px,.8fr) minmax(100px,.8fr);gap:9px}.preparation-list-head{font-size:8px;padding:11px 8px 8px}.preparation-row{padding:13px 8px}.preparation-name{font-size:13px}.preparation-plate,.preparation-storage{font-size:12px}.preparation-date{min-width:0;font-size:16px;flex:1}.preparation-actions .btn{font-size:11px;padding:9px 10px}}@media(max-width:500px){.preparation-actions .calendar-count{width:100%;text-align:center}.preparation-list-head,.preparation-row{grid-template-columns:minmax(0,1.35fr) minmax(92px,.8fr) minmax(85px,.8fr);gap:6px}.preparation-name{font-size:12px}.preparation-plate,.preparation-storage{font-size:11px}.preparation-list-head{letter-spacing:.02em}}
 @media (max-width:800px){.app-nav{width:100%}.app-nav-btn{flex:1}.calendar-head{align-items:flex-start;flex-direction:column}.calendar-actions{width:100%;justify-content:space-between}.calendar-month-nav{margin-left:auto}}
 @media (max-width:700px){
   .modal{
@@ -1584,6 +1585,7 @@ html,body{overflow-x:hidden;max-width:100vw}
   <nav class="app-nav" aria-label="Bereiche">
     <button class="app-nav-btn active" id="navCustomers" type="button">👥 Kundenübersicht</button>
     <button class="app-nav-btn" id="navCalendar" type="button">📅 Kalender</button>
+    <button class="app-nav-btn" id="navPrepare" type="button">🛞 Vorbereiten</button>
   </nav>
 
   <main id="customersView" class="app-view active">
@@ -1698,6 +1700,36 @@ html,body{overflow-x:hidden;max-width:100vw}
       Mit „Kunde hinzufügen“ legst du den ersten Datensatz an.
     </div>
   </section>
+  </main>
+
+  <main id="prepareView" class="app-view">
+    <section class="card preparation-card">
+      <div class="preparation-head">
+        <div class="preparation-title-wrap">
+          <div class="preparation-kicker">🛞 Vorbereitung</div>
+          <h2 class="calendar-title">Reifen vorbereiten</h2>
+          <p class="calendar-subtitle">Wechseltermine für den ausgewählten Werktag kompakt zum Heraussuchen und Vorbereiten.</p>
+        </div>
+        <div class="preparation-actions">
+          <span class="calendar-count" id="preparationCount">0 Termine</span>
+          <button class="btn secondary" id="prepareTomorrowBtn" type="button">Nächster Werktag</button>
+          <button class="btn primary" id="preparePrintBtn" type="button">🖨️ Drucken</button>
+        </div>
+      </div>
+      <div class="preparation-datebar">
+        <button class="calendar-nav-btn" id="preparePrevBtn" type="button" aria-label="Vorheriger Werktag">‹</button>
+        <div class="preparation-date" id="preparationDate"></div>
+        <button class="calendar-nav-btn" id="prepareNextBtn" type="button" aria-label="Nächster Werktag">›</button>
+      </div>
+      <div class="preparation-list-wrap">
+        <div class="preparation-list-head"><span>Kunde</span><span>Kfz-Kennzeichen</span><span>Lagerort</span></div>
+        <div id="preparationList"></div>
+      </div>
+      <div id="preparationEmpty" class="empty preparation-empty" style="display:none">
+        <strong>Keine Wechseltermine für diesen Werktag.</strong>
+        Für den ausgewählten Tag sind aktuell keine Reifenwechsel eingetragen.
+      </div>
+    </section>
   </main>
 
   <main id="calendarView" class="app-view">
@@ -2692,6 +2724,7 @@ function initializeCustomerColumnResizers(force=false){
 
 let calendarDate = new Date();
 calendarDate.setDate(1);
+let preparationDate = new Date();
 
 function calendarDateKey(date){
   const y = date.getFullYear();
@@ -2751,13 +2784,49 @@ function renderCalendar(){
     e.stopPropagation(); switchView("customers"); openCustomer(btn.dataset.customerId);
   }));
 }
+function nextWorkday(date,direction){
+  const d=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+  do{d.setDate(d.getDate()+(direction||1));}while(d.getDay()===0||d.getDay()===6);
+  return d;
+}
+function getPreparationEvents(){
+  const key=calendarDateKey(preparationDate);
+  return getCalendarEvents().filter(ev=>ev.dateKey===key).sort((a,b)=>{
+    const na=(a.lastName+" "+a.firstName).trim(),nb=(b.lastName+" "+b.firstName).trim();
+    return na.localeCompare(nb,"de",{sensitivity:"base"});
+  });
+}
+function renderPreparation(){
+  const dateEl=$("preparationDate"),listEl=$("preparationList"),emptyEl=$("preparationEmpty"),countEl=$("preparationCount");
+  if(!dateEl||!listEl||!emptyEl||!countEl)return;
+  dateEl.textContent=preparationDate.toLocaleDateString("de-DE",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+  const events=getPreparationEvents();
+  countEl.textContent=events.length+" "+(events.length===1?"Termin":"Termine");
+  if(!events.length){listEl.innerHTML="";emptyEl.style.display="block";return;}
+  emptyEl.style.display="none";
+  listEl.innerHTML=events.map(ev=>{
+    const name=(ev.lastName?(ev.lastName+", "):"")+(ev.firstName||"");
+    return '<div class="preparation-row"><button type="button" class="preparation-name preparation-open" data-customer-id="'+esc(ev.id)+'">'+esc(name||"Unbekannter Kunde")+'</button><div class="preparation-plate">'+esc(ev.licensePlate||"—")+'</div><div class="preparation-storage">📍 '+esc(ev.storage||"—")+'</div></div>';
+  }).join("");
+  listEl.querySelectorAll(".preparation-open").forEach(btn=>btn.addEventListener("click",()=>{switchView("customers");openCustomer(btn.dataset.customerId);}));
+}
+function printPreparation(){
+  const events=getPreparationEvents();
+  const dateLabel=preparationDate.toLocaleDateString("de-DE",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+  $("printSheet").className="";
+  $("printSheet").innerHTML='<div class="print-sheet"><div style="font-size:25px;font-weight:950">Reifen vorbereiten</div><div style="margin-top:4px;color:#687588;font-size:13px">'+esc(dateLabel)+'</div><table style="width:100%;border-collapse:collapse;margin-top:18px"><thead><tr><th style="padding:10px 8px;border-bottom:1px solid #d9e0e8;text-align:left;font-size:10px;text-transform:uppercase;color:#687588">Kunde</th><th style="padding:10px 8px;border-bottom:1px solid #d9e0e8;text-align:left;font-size:10px;text-transform:uppercase;color:#687588">Kfz-Kennzeichen</th><th style="padding:10px 8px;border-bottom:1px solid #d9e0e8;text-align:left;font-size:10px;text-transform:uppercase;color:#687588">Lagerort</th></tr></thead><tbody>'+events.map(ev=>{const name=(ev.lastName?(ev.lastName+", "):"")+(ev.firstName||"");return '<tr><td style="padding:10px 8px;border-bottom:1px solid #d9e0e8;font-size:13px">'+esc(name||"Unbekannter Kunde")+'</td><td style="padding:10px 8px;border-bottom:1px solid #d9e0e8;font-size:13px">'+esc(ev.licensePlate||"—")+'</td><td style="padding:10px 8px;border-bottom:1px solid #d9e0e8;font-size:13px">'+esc(ev.storage||"—")+'</td></tr>';}).join("")+'</tbody></table><div style="margin-top:14px;font-size:11px;color:#687588">'+events.length+" "+(events.length===1?"Reifenwechseltermin":"Reifenwechseltermine")+"</div></div>";
+  openPrintSheetWindow("printing-preparation","Reifen vorbereiten – "+dateLabel,"size:A4 portrait; margin:12mm;");
+}
 function switchView(view){
-  const cal=view==="calendar";
-  $("customersView")?.classList.toggle("active",!cal);
+  const cal=view==="calendar",prep=view==="prepare";
+  $("customersView")?.classList.toggle("active",!cal&&!prep);
   $("calendarView")?.classList.toggle("active",cal);
-  $("navCustomers")?.classList.toggle("active",!cal);
+  $("prepareView")?.classList.toggle("active",prep);
+  $("navCustomers")?.classList.toggle("active",!cal&&!prep);
   $("navCalendar")?.classList.toggle("active",cal);
-  if(cal) renderCalendar();
+  $("navPrepare")?.classList.toggle("active",prep);
+  if(cal)renderCalendar();
+  if(prep)renderPreparation();
 }
 function shiftCalendarMonth(delta){
   calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()+delta,1);
@@ -2806,6 +2875,7 @@ function render(){
   $("empty").style.display = list.length ? "none" : "block";
   initializeCustomerColumnResizers();
   renderCalendar();
+  renderPreparation();
   $("customerList").querySelectorAll("tr[data-id]").forEach(tr=>tr.addEventListener("click",e=>{ if(e.target.closest("button")) return; openCustomer(tr.dataset.id); }));
   $("customerList").querySelectorAll(".pdfBtn").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();printCustomer(btn.dataset.id);}));
 }
@@ -3246,6 +3316,11 @@ function closeModal(){
 $("addBtn").onclick=openNew;
 $("navCustomers").onclick=()=>switchView("customers");
 $("navCalendar").onclick=()=>switchView("calendar");
+$("navPrepare").onclick=()=>switchView("prepare");
+$("preparePrevBtn").onclick=()=>{preparationDate=nextWorkday(preparationDate,-1);renderPreparation();};
+$("prepareNextBtn").onclick=()=>{preparationDate=nextWorkday(preparationDate,1);renderPreparation();};
+$("prepareTomorrowBtn").onclick=()=>{preparationDate=nextWorkday(new Date(),1);renderPreparation();};
+$("preparePrintBtn").onclick=printPreparation;
 $("calendarPrevBtn").onclick=()=>shiftCalendarMonth(-1);
 $("calendarNextBtn").onclick=()=>shiftCalendarMonth(1);
 $("calendarTodayBtn").onclick=resetCalendarToToday;
