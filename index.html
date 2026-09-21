@@ -1821,6 +1821,11 @@ html,body{overflow-x:hidden;max-width:100vw}
                   <label for="createdDisplay">Eintrag erstellt am</label>
                   <input id="createdDisplay" type="date" required>
                 </div>
+                <div class="field appointment-field">
+                  <label for="changeAppointment">Wechseltermin</label>
+                  <input id="changeAppointment" type="date">
+                  <div class="season-switch-hint">Der Termin gehört zur aktuell ausgewählten Reifenart. Beim Umstellen auf eine andere Reifenart wird der Termin automatisch gelöscht und kann beim nächsten Wechsel neu eingetragen werden.</div>
+                </div>
                 <div class="field">
                   <label for="storage">Lagerplatz</label>
                   <input id="storage" placeholder="z. B. A-24-03">
@@ -1881,14 +1886,6 @@ html,body{overflow-x:hidden;max-width:100vw}
               <label><input type="radio" name="season" value="Ganzjahresreifen"> Ganzjahresreifen</label>
             </div>
             <div class="season-switch-hint">Mit der Auswahl wechselst du zwischen den gespeicherten Reifensätzen des Kunden. Jeder Reifensatz kann eigene Größe, Hersteller, Stückzahl, Ausführung, Felgenart, Anbaumaterial, Radabdeckung und Profiltiefen haben.</div>
-          </div>
-
-          <div class="storage-appointment-row">
-            <div class="field appointment-field">
-              <label for="changeAppointment">Wechseltermin</label>
-              <input id="changeAppointment" type="date">
-              <div class="season-switch-hint">Der Termin gehört zur aktuell ausgewählten Reifenart. Beim Umstellen auf eine andere Reifenart wird der Termin automatisch gelöscht und kann beim nächsten Wechsel neu eingetragen werden.</div>
-            </div>
           </div>
 
           <div class="season-specific-equipment">
