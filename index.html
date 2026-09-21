@@ -417,6 +417,8 @@ td{font-size:14px}
 tbody tr{cursor:pointer;transition:.12s background}
 tbody tr:hover{background:#f8faff}
 .name{font-weight:800}
+.name-with-note{display:inline-flex;align-items:center;gap:7px}
+.name-note-dot{width:8px;height:8px;min-width:8px;border-radius:50%;background:#d32f2f;display:inline-block}
 
 .tire-brand{
   font-size:11px;
@@ -2864,7 +2866,7 @@ function render(){
     const incomplete = customerIncomplete(c);
     return `<tr data-id="${c.id}" class="${incomplete ? "customer-incomplete" : ""}">
       <td><span class="pill">${esc(c.customerNumber || "—")}</span></td>
-      <td><div class="name">${esc(c.lastName)}${c.lastName && c.firstName ? ", " : ""}${esc(c.firstName)}</div><div class="meta">${esc(c.phone || "Keine Telefonnummer")}</div>${c.email ? `<div class="meta">${esc(c.email)}</div>` : ""}${incomplete ? `<div class="overview-warning">⚠ Angaben unvollständig<div class="meta">Fehlt: ${missingImportantFields(c).map(esc).join(", ")}</div></div>` : ""}</td>
+      <td><div class="name name-with-note">${c.notes && String(c.notes).trim() ? '<span class="name-note-dot" title="Bemerkung vorhanden"></span>' : ""}${esc(c.lastName)}${c.lastName && c.firstName ? ", " : ""}${esc(c.firstName)}</div><div class="meta">${esc(c.phone || "Keine Telefonnummer")}</div>${c.email ? `<div class="meta">${esc(c.email)}</div>` : ""}${incomplete ? `<div class="overview-warning">⚠ Angaben unvollständig<div class="meta">Fehlt: ${missingImportantFields(c).map(esc).join(", ")}</div></div>` : ""}</td>
       <td><span class="pill plate-pill">${esc(c.licensePlate || "—")}</span></td>
       <td><span class="pill tire-season-pill">${t.quantity ? esc(t.quantity) + " × " : ""}${esc(useSeason || "Nicht angegeben")}</span>${t.tireConstruction ? `<div class="meta">${esc(t.tireConstruction)}</div>` : ""}</td>
       <td><span class="pill">${esc(c.vehicleType || "—")}</span></td>
