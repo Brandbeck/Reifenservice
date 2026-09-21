@@ -3029,26 +3029,27 @@ function printCustomerList(){
   }
   .sheet { width:100%; }
   .head {
+    position:relative;
     display:flex;
     align-items:flex-start;
-    justify-content:space-between;
+    justify-content:center;
     gap:16px;
     padding:0 0 7px;
     margin-bottom:8px;
     border-bottom:2px solid #172033;
   }
-  .head-left { min-width:0; }
+  .head-left { min-width:0; width:100%; text-align:center; }
   .logo {
     width:42mm;
     max-height:16mm;
     object-fit:contain;
-    object-position:left center;
+    object-position:center center;
     display:block;
-    margin-bottom:3mm;
+    margin:0 auto 3mm;
   }
   h1 { margin:0; font-size:18px; line-height:1.1; font-weight:900; }
   .subtitle { margin-top:3px; font-size:9px; color:#687588; }
-  .count { text-align:right; font-size:9px; color:#687588; white-space:nowrap; }
+  .count { position:absolute; right:0; top:0; text-align:right; font-size:9px; color:#687588; white-space:nowrap; }
   table { width:100%; border-collapse:collapse; table-layout:fixed; }
   th, td {
     padding:5px 5px;
