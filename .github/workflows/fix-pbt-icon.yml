@@ -56,6 +56,51 @@ jobs:
           print(f"Updated index.html; removed {removed} dynamic icon installer(s).")
           PY
 
+      - name: Update entry-date handling
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("index.html")
+          html = path.read_text(encoding="utf-8")
+          original = html
+
+          replacements = [
+              (
+                  '<div class="field">\n                  <label for="createdDisplay">Eintrag erstellt am</label>\n                  <input id="createdDisplay" type="date" required>\n                </div>',
+                  '<div class="field" id="createdDisplayField">\n                  <label for="createdDisplay">Eintrag erstellt am <span class="required-star">*</span></label>\n                  <input id="createdDisplay" type="date">\n                </div>'
+              ),
+              (
+                  '  if(!(c.licensePlate || "").trim()) missing.push("Kfz-Kennzeichen");',
+                  '  if(!(c.licensePlate || "").trim()) missing.push("Kfz-Kennzeichen");\n  if(!(c.createdAt || "").trim()) missing.push("Eintrag erstellt am");'
+              ),
+              (
+                  '    [$("licensePlateField"), $("licensePlate").value.trim() !== ""],',
+                  '    [$("licensePlateField"), $("licensePlate").value.trim() !== ""],\n    [$("createdDisplayField"), $("createdDisplay").value.trim() !== ""],'
+              ),
+              (
+                  '  $("changeAppointment").value="";\n  activeTireSeason = next;',
+                  '  $("changeAppointment").value="";\n  $("createdDisplay").value="";\n  activeTireSeason = next;'
+              ),
+              (
+                  'notes:$("notes").value.trim(),createdAt:$("createdDisplay").value||todayISO()',
+                  'notes:$("notes").value.trim(),createdAt:$("createdDisplay").value||""'
+              ),
+              (
+                  '$("licensePlate").addEventListener("input",updateCompletenessNotice);',
+                  '$("licensePlate").addEventListener("input",updateCompletenessNotice);\n$("createdDisplay").addEventListener("input",updateCompletenessNotice);\n$("createdDisplay").addEventListener("change",updateCompletenessNotice);'
+              )
+          ]
+
+          for old, new in replacements:
+              if old not in html:
+                  raise SystemExit("Expected code fragment not found:\n" + old)
+              html = html.replace(old, new, 1)
+
+          path.write_text(html, encoding="utf-8")
+          print("Entry-date handling updated." if html != original else "No changes needed.")
+          PY
+
       - name: Commit icon fix
         run: |
           git config user.name "github-actions[bot]"
