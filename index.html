@@ -1606,71 +1606,13 @@ html,body{overflow-x:hidden;max-width:100vw}
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-title" content="Reifenservice">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>
-(() => {
-  const installPbtIcon = () => {
-    const source = document.querySelector('.auth-brand .logo') || document.querySelector('.brand-logo-wrap img');
-    if (!source || !source.complete || !source.naturalWidth) return;
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 180;
-    canvas.height = 180;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, 180, 180);
-
-    // Clean PBT icon: crop the existing company logo so the old
-    // “RACING” line is not shown on the Home Screen icon.
-    const sw = source.naturalWidth;
-    const sh = source.naturalHeight;
-    const cropH = Math.min(sh, Math.round(sw * 0.82));
-    const sy = Math.max(0, Math.round((sh - cropH) * 0.30));
-    const cropW = Math.min(sw, Math.round(cropH * 0.98));
-    const sx = Math.max(0, Math.round((sw - cropW) / 2));
-
-    ctx.drawImage(source, sx, sy, cropW, cropH, 0, 0, 180, 180);
-    const iconUrl = canvas.toDataURL('image/png');
-
-    ['icon', 'apple-touch-icon'].forEach(rel => {
-      let link = document.querySelector(`link[rel="${rel}"][data-pbt-icon]`);
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = rel;
-        link.setAttribute('data-pbt-icon', 'true');
-        document.head.appendChild(link);
-      }
-      link.href = iconUrl;
-    });
-  };
-
-  const run = () => setTimeout(installPbtIcon, 100);
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
-  else run();
-  window.addEventListener('load', run, { once: true });
-})();
-</script>
 <!-- PBT-HOME-ICON-V1 -->
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-title" content="Reifenservice">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>
-(() => {
-  const installPbtIcon = () => {
-    const logo = document.querySelector('.auth-brand .logo') || document.querySelector('.brand-logo-wrap img');
-    if (!logo || !logo.src) return;
-    ['icon', 'apple-touch-icon'].forEach(rel => {
-      let link = document.querySelector(`link[rel="${rel}"][data-pbt-icon]`);
-      if (!link) { link = document.createElement('link'); link.rel = rel; link.setAttribute('data-pbt-icon', 'true'); document.head.appendChild(link); }
-      link.href = logo.src;
-    });
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installPbtIcon);
-  else installPbtIcon();
-  window.addEventListener('load', installPbtIcon, { once: true });
-})();
-</script>
+
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 </head>
 <body>
 <div class="auth-screen" id="authScreen">
