@@ -1,0 +1,74 @@
+name: Set Home Screen Icon
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  set-icon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add PBT Home Screen icon metadata
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          marker = 'PBT-HOME-ICON-V1'
+          if marker in text:
+              print('Home Screen icon metadata already present.')
+              raise SystemExit(0)
+
+          injection = '''<!-- PBT-HOME-ICON-V1 -->
+          <meta name="theme-color" content="#ffffff">
+          <meta name="apple-mobile-web-app-title" content="Reifenservice">
+          <meta name="apple-mobile-web-app-capable" content="yes">
+          <script>
+          (() => {
+            const installPbtIcon = () => {
+              const logo = document.querySelector('.auth-brand .logo') || document.querySelector('.brand-logo-wrap img');
+              if (!logo || !logo.src) return;
+              ['icon', 'apple-touch-icon'].forEach(rel => {
+                let link = document.querySelector(`link[rel="${rel}"][data-pbt-icon]`);
+                if (!link) {
+                  link = document.createElement('link');
+                  link.rel = rel;
+                  link.setAttribute('data-pbt-icon', 'true');
+                  document.head.appendChild(link);
+                }
+                link.href = logo.src;
+              });
+            };
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installPbtIcon);
+            else installPbtIcon();
+            window.addEventListener('load', installPbtIcon, { once: true });
+          })();
+          </script>
+          '''
+
+          needle = '</head>'
+          if needle not in text:
+              raise SystemExit('Could not find </head> in index.html')
+          text = text.replace(needle, injection + needle, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit icon metadata
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Set PBT Racing Home Screen icon'
+          git push
