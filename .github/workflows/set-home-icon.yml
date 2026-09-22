@@ -13,18 +13,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Mobile Layout und Home-Screen-Metadaten anwenden
+      - name: Home-Screen-Icon und Mobile Layout anwenden
         shell: bash
         run: |
           python3 <<'PY'
           from pathlib import Path
+          import base64
 
           path = Path('index.html')
           text = path.read_text(encoding='utf-8')
 
-          # Home-Screen-Icon
-          marker = 'PBT-HOME-ICON-V1'
-          if marker not in text:
+          if 'PBT-HOME-ICON-V1' not in text:
               injection = '''<!-- PBT-HOME-ICON-V1 -->
           <meta name="theme-color" content="#ffffff">
           <meta name="apple-mobile-web-app-title" content="Reifenservice">
@@ -36,12 +35,7 @@ jobs:
               if (!logo || !logo.src) return;
               ['icon', 'apple-touch-icon'].forEach(rel => {
                 let link = document.querySelector(`link[rel="${rel}"][data-pbt-icon]`);
-                if (!link) {
-                  link = document.createElement('link');
-                  link.rel = rel;
-                  link.setAttribute('data-pbt-icon', 'true');
-                  document.head.appendChild(link);
-                }
+                if (!link) { link = document.createElement('link'); link.rel = rel; link.setAttribute('data-pbt-icon', 'true'); document.head.appendChild(link); }
                 link.href = logo.src;
               });
             };
@@ -51,79 +45,13 @@ jobs:
           })();
           </script>
           '''
-              if '</head>' not in text:
-                  raise SystemExit('Could not find </head> in index.html')
               text = text.replace('</head>', injection + '</head>', 1)
 
-          # Mobile Layout
-          mobile_marker = 'Mobile phone layout v2'
-          if mobile_marker not in text:
-              css = r'''
-
-/* Mobile phone layout v2 */
-@media (max-width:600px){
-  html,body{width:100%;max-width:100%;overflow-x:hidden}
-  .app-nav{width:calc(100% - 16px);margin:0 8px 12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;overflow:hidden}
-  .app-nav-btn{min-width:0;width:100%;padding:9px 4px;font-size:10px;line-height:1.15;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-  #customersView .tablewrap{overflow:visible;padding:0 10px 10px}
-  #customersView table{width:100%;min-width:0}
-  #customersView table tbody tr{width:100%;max-width:100%}
-
-  #calendarView .calendar-head{padding:14px}
-  #calendarView .calendar-title{font-size:18px}
-  #calendarView .calendar-subtitle{font-size:11px;line-height:1.35}
-  #calendarView .calendar-actions{width:100%;gap:6px;align-items:center}
-  #calendarView .calendar-actions .btn{font-size:10px;padding:8px 9px}
-  #calendarView .calendar-month-nav{margin-left:auto}
-  #calendarView .calendar-nav-btn{width:34px;height:34px;font-size:18px}
-  #calendarView .calendar-grid-wrap{padding:6px}
-  #calendarView .calendar-weekday{padding:5px 1px;font-size:7px;letter-spacing:.02em}
-  #calendarView .calendar-day{min-height:76px;padding:4px 2px}
-  #calendarView .calendar-day-number{font-size:9px;margin-bottom:3px}
-  #calendarView .calendar-event{padding:3px 2px;margin-bottom:2px;border-radius:5px}
-  #calendarView .calendar-event-name{font-size:7px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #calendarView .calendar-event-meta,#calendarView .calendar-event-season{display:none}
-  #calendarView .calendar-more{font-size:6.5px;padding:1px 2px}
-  #calendarView .calendar-legend{font-size:9px;padding:0 10px 10px;gap:6px}
-
-  #prepareView .preparation-head{padding:14px;gap:12px}
-  #prepareView .preparation-head h2{font-size:20px;line-height:1.15}
-  #prepareView .preparation-head p{font-size:11px;line-height:1.35;margin-top:4px}
-  #prepareView .preparation-actions{display:grid;width:100%;grid-template-columns:1fr 1fr;gap:7px;align-items:stretch}
-  #prepareView .preparation-actions .calendar-count{grid-column:1/-1;width:100%;text-align:center;padding:8px 9px;font-size:11px}
-  #prepareView .preparation-actions .btn{width:100%;font-size:11px;padding:9px 8px}
-  #prepareView .preparation-datebar{padding:10px 12px;gap:8px}
-  #prepareView .preparation-date{font-size:15px;line-height:1.2;min-width:0}
-  #prepareView .preparation-datebar .calendar-nav-btn{width:36px;height:36px;flex:0 0 36px}
-  #prepareView .preparation-list-wrap{padding:0 10px 12px}
-  #prepareView .preparation-list-head{display:none}
-  #prepareView #preparationList{display:grid;gap:9px}
-  #prepareView .preparation-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 4px 14px rgba(24,39,58,.05)}
-  #prepareView .preparation-row > *{min-width:0;padding:8px 0;border-bottom:1px solid #edf1f5;font-size:11px;line-height:1.25;overflow-wrap:anywhere}
-  #prepareView .preparation-row > :nth-child(1){grid-column:1/-1;font-size:15px;padding-top:2px}
-  #prepareView .preparation-row > :nth-child(2){grid-column:1}
-  #prepareView .preparation-row > :nth-child(3){grid-column:2}
-  #prepareView .preparation-row > :nth-child(4){grid-column:1}
-  #prepareView .preparation-row > :nth-child(5){grid-column:2}
-  #prepareView .preparation-row > :nth-child(6){grid-column:1}
-  #prepareView .preparation-row > :nth-child(7){grid-column:2;border-bottom:0}
-  #prepareView .preparation-row > :nth-child(1)::before,#prepareView .preparation-row > :nth-child(2)::before,#prepareView .preparation-row > :nth-child(3)::before,#prepareView .preparation-row > :nth-child(4)::before,#prepareView .preparation-row > :nth-child(5)::before,#prepareView .preparation-row > :nth-child(6)::before,#prepareView .preparation-row > :nth-child(7)::before{display:block;margin-bottom:3px;font-size:8px;line-height:1.1;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:900}
-  #prepareView .preparation-row > :nth-child(1)::before{content:"Kunde"}
-  #prepareView .preparation-row > :nth-child(2)::before{content:"Kfz-Kennzeichen"}
-  #prepareView .preparation-row > :nth-child(3)::before{content:"Lagerort"}
-  #prepareView .preparation-row > :nth-child(4)::before{content:"Stückzahl"}
-  #prepareView .preparation-row > :nth-child(5)::before{content:"Ausführung"}
-  #prepareView .preparation-row > :nth-child(6)::before{content:"Anbaumaterial"}
-  #prepareView .preparation-row > :nth-child(7)::before{content:"Radabdeckung"}
-  #prepareView .preparation-row .preparation-name{font-size:15px;font-weight:900}
-  #prepareView .preparation-row .preparation-plate,#prepareView .preparation-row .preparation-storage{font-size:12px}
-  #prepareView .preparation-empty{margin:0 10px 12px}
-}
-'''
-              if '</style>' not in text:
-                  raise SystemExit('Could not find </style> in index.html')
-              text = text.replace('</style>', css + '</style>', 1)
+          marker = 'Mobile phone layout v2'
+          if marker not in text:
+              css_b64 = 'LyogTW9iaWxlIHBob25lIGxheW91dCB2MiAqLwpAbWVkaWEgKG1heC13aWR0aDo2MDBweCl7CiAgaHRtbCxib2R5e3dpZHRoOjEwMCU7bWF4LXdpZHRoOjEwMCU7b3ZlcmZsb3cteDpoaWRkZW59CiAgLmFwcC1uYXZ7d2lkdGg6Y2FsYygxMDAlIC0gMTZweCk7bWFyZ2luOjAgOHB4IDEycHg7ZGlzcGxheTpncmlkO2dyaWQtdGVtcGxhdGUtY29sdW1uczpyZXBlYXQoMyxtaW5tYXgoMCwxZnIpKTtnYXA6NHB4O3BhZGRpbmc6NHB4O292ZXJmbG93OmhpZGRlbn0KICAuYXBwLW5hdi1idG57bWluLXdpZHRoOjA7d2lkdGg6MTAwJTtwYWRkaW5nOjlweCA0cHg7Zm9udC1zaXplOjEwcHg7bGluZS1oZWlnaHQ6MS4xNTt0ZXh0LWFsaWduOmNlbnRlcjtvdmVyZmxvdzpoaWRkZW47dGV4dC1vdmVyZmxvdzplbGxpcHNpczt3aGl0ZS1zcGFjZTpub3dyYXB9CiAgI2N1c3RvbWVyc1ZpZXcgLnRhYmxld3JhcHtvdmVyZmxvdzp2aXNpYmxlO3BhZGRpbmc6MCAxMHB4IDEwcHh9CiAgI2N1c3RvbWVyc1ZpZXcgdGFibGV7d2lkdGg6MTAwJTttaW4td2lkdGg6MH0KICAjY2FsZW5kYXJWaWV3IC5jYWxlbmRhci1oZWFke3BhZGRpbmc6MTRweH0KICAjY2FsZW5kYXJWaWV3IC5jYWxlbmRhci10aXRsZXtmb250LXNpemU6MThweH0KICAjY2FsZW5kYXJWaWV3IC5jYWxlbmRhci1zdWJ0aXRsZXtmb250LXNpemU6MTFweDtsaW5lLWhlaWdodDoxLjM1fQogICNjYWxlbmRhclZpZXcgLmNhbGVuZGFyLWFjdGlvbnN7d2lkdGg6MTAwJTtnYXA6NnB4O2FsaWduLWl0ZW1zOmNlbnRlcn0KICAjY2FsZW5kYXJWaWV3IC5jYWxlbmRhci1hY3Rpb25zIC5idG57Zm9udC1zaXplOjEwcHg7cGFkZGluZzo4cHggOXB4fQogICNjYWxlbmRhclZpZXcgLmNhbGVuZGFyLW1vbnRoLW5hdnttYXJnaW4tbGVmdDphdXRvfQogICNjYWxlbmRhclZpZXcgLmNhbGVuZGFyLW5hdi1idG57d2lkdGg6MzRweDtoZWlnaHQ6MzRweDtmb250LXNpemU6MThweH0KICAjY2FsZW5kYXJWaWV3IC5jYWxlbmRhci1ncmlkLXdyYXB7cGFkZGluZzo2cHh9CiAgI2NhbGVuZGFyVmlldyAuY2FsZW5kYXItemVla2RheXtwYWRkaW5nOjVweCAxcHg7Zm9udC1zaXplOjdweDtsZXR0ZXItc3BhY2luZzouMDJlbX0KICAjY2FsZW5kYXJWaWV3IC5jYWxlbmRhci1kYXl7bWluLWhlaWdodDo3NnB4O3BhZGRpbmc6NHB4IDJweH0KICAjY2FsZW5kYXJWaWV3IC5jYWxlbmRhci1kYXktbnVtYmVye2ZvbnQtc2l6ZTo5cHg7bWFyZ2luLWJvdHRvbTozcHh9CiAgI2NhbGVuZGFyVmlldyAuY2FsZW5kYXItZXZlbnR7cGFkZGluZzozcHggMnB4O21hcmdpbi1ib3R0b206MnB4O2JvcmRlci1yYWRpdXM6NXB4fQogICNjYWxlbmRhclZpZXcgLmNhbGVuZGFyLWV2ZW50LW5hbWV7Zm9udC1zaXplOjdweDtsaW5lLWhlaWdodDoxLjE1O3doaXRlLXNwYWNlOm5vd3JhcDtvdmVyZmxvdzpoaWRkZW47dGV4dC1vdmVyZmxvdzplbGxpcHNpc30KICAjY2FsZW5kYXJWaWV3IC5jYWxlbmRhci1ldmVudC1tZXRhLCNjYWxlbmRhclZpZXcgLmNhbGVuZGFyLWV2ZW50LXNlYXNvbntkaXNwbGF5Om5vbmV9CiAgI2NhbGVuZGFyVmlldyAuY2FsZW5kYXItbW9yZXtmb250LXNpemU6Ni41cHg7cGFkZGluZzoxcHggMnB4fQogICNjYWxlbmRhclZpZXcgLmNhbGVuZGFyLWxlZ2VuZHtmb250LXNpemU6OXB4O3BhZGRpbmc6MCAxMHB4IDEwcHg7Z2FwOjZweH0KICAjcHJlcGFyZVZpZXcgLnByZXBhcmF0aW9uLWhlYWR7cGFkZGluZzoxNHB4O2dhcDoxMnB4fQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24taGVhZCBoMntmb250LXNpemU6MjBweDtsaW5lLWhlaWdodDoxLjE1fQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24taGVhZCBwe2ZvbnQtc2l6ZToxMXB4O2xpbmUtaGVpZ2h0OjEuMzU7bWFyZ2luLXRvcDo0cHh9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1hY3Rpb25ze2Rpc3BsYXk6Z3JpZDt3aWR0aDoxMDAlO2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnIgMWZyO2dhcDo3cHg7YWxpZ24taXRlbXM6c3RyZXRjaH0KICAjcHJlcGFyZVZpZXcgLnByZXBhcmF0aW9uLWFjdGlvbnMgLmNhbGVuZGFyLWNvdW50e2dyaWQtY29sdW1uOjEvLTE7d2lkdGg6MTAwJTt0ZXh0LWFsaWduOmNlbnRlcjtwYWRkaW5nOjhweCA5cHg7Zm9udC1zaXplOjExcHh9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1hY3Rpb25zIC5idG57d2lkdGg6MTAwJTtmb250LXNpemU6MTFweDtwYWRkaW5nOjlweCA4cHh9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1kYXRlYmFye3BhZGRpbmc6MTBweCAxMnB4O2dhcDo4cHh9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1kYXRle2ZvbnQtc2l6ZToxNXB4O2xpbmUtaGVpZ2h0OjEuMjttaW4td2lkdGg6MH0KICAjcHJlcGFyZVZpZXcgLnByZXBhcmF0aW9uLWRhdGViYXIgLmNhbGVuZGFyLW5hdi1idG57d2lkdGg6MzZweDtoZWlnaHQ6MzZweDtmbGV4OjAgMCAzNnB4fQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tbGlzdC13cmFwe3BhZGRpbmc6MCAxMHB4IDEycHh9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1saXN0LWhlYWR7ZGlzcGxheTpub25lfQogICNwcmVwYXJlVmlldyAjcHJlcGFyYXRpb25MaXN0e2Rpc3BsYXk6Z3JpZDtnYXA6OXB4fQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93e2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6bWlubWF4KDAsMWZyKSBtaW5tYXgoMCwxZnIpO2dhcDowIDEwcHg7cGFkZGluZzoxMXB4IDEycHg7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtib3JkZXItcmFkaXVzOjEzcHg7YmFja2dyb3VuZDojZmZmO2JveC1zaGFkb3c6MCA0cHggMTRweCByZ2JhKDI0LDM5LDU4LC4wNSl9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiAqe21pbi13aWR0aDowO3BhZGRpbmc6OHB4IDA7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgI2VkZjFmNTtmb250LXNpemU6MTFweDtsaW5lLWhlaWdodDoxLjI1O292ZXJmbG93LXdyYXA6YW55d2hlcmV9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDEpe2dyaWQtY29sdW1uOjEvLTE7Zm9udC1zaXplOjE1cHg7cGFkZGluZy10b3A6MnB4fQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93ID4gOm50aC1jaGlsZCgyKXtncmlkLWNvbHVtbjoxfQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93ID4gOm50aC1jaGlsZCgzKXtncmlkLWNvbHVtbjoyfQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93ID4gOm50aC1jaGlsZCg0KXtncmlkLWNvbHVtbjoxfQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93ID4gOm50aC1jaGlsZCg1KXtncmlkLWNvbHVtbjoyfQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93ID4gOm50aC1jaGlsZCg2KXtncmlkLWNvbHVtbjoxfQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93ID4gOm50aC1jaGlsZCg3KXtncmlkLWNvbHVtbjoyO2JvcmRlci1ib3R0b206MH0KICAjcHJlcGFyZVZpZXcgLnByZXBhcmF0aW9uLXJvdyA+IDpudGgtY2hpbGQoMSk6OmJlZm9yZXtjb250ZW50OiJLdW5kZSJ9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDIpOjpiZWZvcmV7Y29udGVudDoiS2Z6LUtlbm56ZWljaGVuIn0KICAjcHJlcGFyZVZpZXcgLnByZXBhcmF0aW9uLXJvdyA+IDpudGgtY2hpbGQoMyk6OmJlZm9yZXtjb250ZW50OiJMYWdlcm9ydCJ9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDQpOjpiZWZvcmV7Y29udGVudDoiU3TDvGNremFobCJ9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDUpOjpiZWZvcmV7Y29udGVudDoiQXVzZsO8aHJ1bmcifQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93ID4gOm50aC1jaGlsZCg2KTo6YmVmb3Jle2NvbnRlbnQ6IkFuYmF1bWF0ZXJpYWwifQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93ID4gOm50aC1jaGlsZCg3KTo6YmVmb3Jle2NvbnRlbnQ6IlJhZGFiZGVja3VuZyJ9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDEpOjpiZWZvcmUsI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDIpOjpiZWZvcmUsI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDMpOjpiZWZvcmUsI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDQpOjpiZWZvcmUsI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDUpOjpiZWZvcmUsI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDYpOjpiZWZvcmUsI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgPiA6bnRoLWNoaWxkKDcpOjpiZWZvcmV7ZGlzcGxheTpibG9jazttYXJnaW4tYm90dG9tOjNweDtmb250LXNpemU6OHB4O2xpbmUtaGVpZ2h0OjEuMTt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjA1ZW07Y29sb3I6dmFyKC0tbXV0ZWQpO2ZvbnQtd2VpZ2h0OjkwMH0KICAjcHJlcGFyZVZpZXcgLnByZXBhcmF0aW9uLXJvdyAucHJlcGFyYXRpb24tbmFtZXtmb250LXNpemU6MTVweDtmb250LXdlaWdodDo5MDB9CiAgI3ByZXBhcmVWaWV3IC5wcmVwYXJhdGlvbi1yb3cgLnByZXBhcmF0aW9uLXBsYXRlLCNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tcm93IC5wcmVwYXJhdGlvbi1zdG9yYWdle2ZvbnQtc2l6ZToxMnB4fQogICNwcmVwYXJlVmlldyAucHJlcGFyYXRpb24tZW1wdHl7bWFyZ2luOjAgMTBweCAxMnB4fQp9Cg=='
+              css = base64.b64decode(css_b64).decode('utf-8')
+              text = text.replace('</style>', css + '\n</style>', 1)
 
           path.write_text(text, encoding='utf-8')
           PY
