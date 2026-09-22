@@ -1,4 +1,4 @@
-name: Patch Home Icon Workflow
+name: Patch PBT Home Icon
 
 on:
   push:
@@ -6,46 +6,44 @@ on:
 
 permissions:
   contents: write
-  workflows: write
 
 jobs:
   patch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch existing icon workflow
+      - name: Patch index icon
         run: |
-          python3 - <<'PY'
+          python3 - <<'PY2'
           from pathlib import Path
-          p = Path('.github/workflows/set-home-icon.yml')
+          p = Path('index.html')
           s = p.read_text(encoding='utf-8')
           if 'PBT-HOME-ICON-V2' not in s:
-              old = "              link.href = logo.src;"
-              new = """              const canvas = document.createElement('canvas');
-              canvas.width = 180; canvas.height = 180;
-              const ctx = canvas.getContext('2d');
-              if (!ctx) return;
-              ctx.fillStyle = '#ffffff';
-              ctx.fillRect(0, 0, 180, 180);
-              const sw = logo.naturalWidth, sh = logo.naturalHeight;
-              const cropH = Math.min(sh, Math.round(sw * 0.82));
-              const sy = Math.max(0, Math.round((sh - cropH) * 0.30));
-              const cropW = Math.min(sw, Math.round(cropH * 0.98));
-              const sx = Math.max(0, Math.round((sw - cropW) / 2));
-              ctx.drawImage(logo, sx, sy, cropW, cropH, 0, 0, 180, 180);
-              link.href = canvas.toDataURL('image/png');"""
+              old = "                link.href = logo.src;"
+              new = """                const canvas = document.createElement('canvas');
+                canvas.width = 180; canvas.height = 180;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 180, 180);
+                const sw = logo.naturalWidth, sh = logo.naturalHeight;
+                const cropH = Math.min(sh, Math.round(sw * 0.82));
+                const sy = Math.max(0, Math.round((sh - cropH) * 0.30));
+                const cropW = Math.min(sw, Math.round(cropH * 0.98));
+                const sx = Math.max(0, Math.round((sw - cropW) / 2));
+                ctx.drawImage(logo, sx, sy, cropW, cropH, 0, 0, 180, 180);
+                link.href = canvas.toDataURL('image/png');"""
               if old not in s:
                   raise SystemExit('icon line not found')
               s = s.replace(old, new, 1)
               s = s.replace('<!-- PBT-HOME-ICON-V1 -->', '<!-- PBT-HOME-ICON-V2 -->', 1)
-              s = s.replace("if 'PBT-HOME-ICON-V1' not in text:", "if 'PBT-HOME-ICON-V2' not in text:", 1)
               p.write_text(s, encoding='utf-8')
-          PY
+          PY2
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/workflows/set-home-icon.yml
+          git add index.html
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Use clean PBT home screen icon"
           git push
