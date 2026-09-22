@@ -1543,6 +1543,63 @@ html,body{overflow-x:hidden;max-width:100vw}
 }
 @media(min-width:601px){.mobile-step-actions{display:none!important}}
 
+/* Mobile phone layout v2 */
+@media (max-width:600px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  .app-nav{width:calc(100% - 16px);margin:0 8px 12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;overflow:hidden}
+  .app-nav-btn{min-width:0;width:100%;padding:9px 4px;font-size:10px;line-height:1.15;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #customersView .tablewrap{overflow:visible;padding:0 10px 10px}
+  #customersView table{width:100%;min-width:0}
+  #calendarView .calendar-head{padding:14px}
+  #calendarView .calendar-title{font-size:18px}
+  #calendarView .calendar-subtitle{font-size:11px;line-height:1.35}
+  #calendarView .calendar-actions{width:100%;gap:6px;align-items:center}
+  #calendarView .calendar-actions .btn{font-size:10px;padding:8px 9px}
+  #calendarView .calendar-month-nav{margin-left:auto}
+  #calendarView .calendar-nav-btn{width:34px;height:34px;font-size:18px}
+  #calendarView .calendar-grid-wrap{padding:6px}
+  #calendarView .calendar-zeekday{padding:5px 1px;font-size:7px;letter-spacing:.02em}
+  #calendarView .calendar-day{min-height:76px;padding:4px 2px}
+  #calendarView .calendar-day-number{font-size:9px;margin-bottom:3px}
+  #calendarView .calendar-event{padding:3px 2px;margin-bottom:2px;border-radius:5px}
+  #calendarView .calendar-event-name{font-size:7px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #calendarView .calendar-event-meta,#calendarView .calendar-event-season{display:none}
+  #calendarView .calendar-more{font-size:6.5px;padding:1px 2px}
+  #calendarView .calendar-legend{font-size:9px;padding:0 10px 10px;gap:6px}
+  #prepareView .preparation-head{padding:14px;gap:12px}
+  #prepareView .preparation-head h2{font-size:20px;line-height:1.15}
+  #prepareView .preparation-head p{font-size:11px;line-height:1.35;margin-top:4px}
+  #prepareView .preparation-actions{display:grid;width:100%;grid-template-columns:1fr 1fr;gap:7px;align-items:stretch}
+  #prepareView .preparation-actions .calendar-count{grid-column:1/-1;width:100%;text-align:center;padding:8px 9px;font-size:11px}
+  #prepareView .preparation-actions .btn{width:100%;font-size:11px;padding:9px 8px}
+  #prepareView .preparation-datebar{padding:10px 12px;gap:8px}
+  #prepareView .preparation-date{font-size:15px;line-height:1.2;min-width:0}
+  #prepareView .preparation-datebar .calendar-nav-btn{width:36px;height:36px;flex:0 0 36px}
+  #prepareView .preparation-list-wrap{padding:0 10px 12px}
+  #prepareView .preparation-list-head{display:none}
+  #prepareView #preparationList{display:grid;gap:9px}
+  #prepareView .preparation-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 4px 14px rgba(24,39,58,.05)}
+  #prepareView .preparation-row > *{min-width:0;padding:8px 0;border-bottom:1px solid #edf1f5;font-size:11px;line-height:1.25;overflow-wrap:anywhere}
+  #prepareView .preparation-row > :nth-child(1){grid-column:1/-1;font-size:15px;padding-top:2px}
+  #prepareView .preparation-row > :nth-child(2){grid-column:1}
+  #prepareView .preparation-row > :nth-child(3){grid-column:2}
+  #prepareView .preparation-row > :nth-child(4){grid-column:1}
+  #prepareView .preparation-row > :nth-child(5){grid-column:2}
+  #prepareView .preparation-row > :nth-child(6){grid-column:1}
+  #prepareView .preparation-row > :nth-child(7){grid-column:2;border-bottom:0}
+  #prepareView .preparation-row > :nth-child(1)::before{content:"Kunde"}
+  #prepareView .preparation-row > :nth-child(2)::before{content:"Kfz-Kennzeichen"}
+  #prepareView .preparation-row > :nth-child(3)::before{content:"Lagerort"}
+  #prepareView .preparation-row > :nth-child(4)::before{content:"Stückzahl"}
+  #prepareView .preparation-row > :nth-child(5)::before{content:"Ausführung"}
+  #prepareView .preparation-row > :nth-child(6)::before{content:"Anbaumaterial"}
+  #prepareView .preparation-row > :nth-child(7)::before{content:"Radabdeckung"}
+  #prepareView .preparation-row > :nth-child(1)::before,#prepareView .preparation-row > :nth-child(2)::before,#prepareView .preparation-row > :nth-child(3)::before,#prepareView .preparation-row > :nth-child(4)::before,#prepareView .preparation-row > :nth-child(5)::before,#prepareView .preparation-row > :nth-child(6)::before,#prepareView .preparation-row > :nth-child(7)::before{display:block;margin-bottom:3px;font-size:8px;line-height:1.1;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:900}
+  #prepareView .preparation-row .preparation-name{font-size:15px;font-weight:900}
+  #prepareView .preparation-row .preparation-plate,#prepareView .preparation-row .preparation-storage{font-size:12px}
+  #prepareView .preparation-empty{margin:0 10px 12px}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- PBT-HOME-ICON-V1 -->
