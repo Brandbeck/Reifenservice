@@ -1,0 +1,100 @@
+name: Update PBT home icon
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update-icon-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update home-screen icon code
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          marker = '<!-- PBT-HOME-ICON-V1 -->'
+          start = text.find(marker)
+          if start == -1:
+              raise SystemExit('PBT-HOME-ICON-V1 marker not found')
+
+          script_start = text.find('<script>', start)
+          script_end = text.find('</script>', script_start)
+          if script_start == -1 or script_end == -1:
+              raise SystemExit('PBT icon script block not found')
+
+          new_block = '''<!-- PBT-HOME-ICON-V2 -->
+          <meta name="theme-color" content="#ffffff">
+          <meta name="apple-mobile-web-app-title" content="Reifenservice">
+          <meta name="apple-mobile-web-app-capable" content="yes">
+          <script>
+          (() => {
+            const installPbtIcon = () => {
+              const source = document.querySelector('.auth-brand .logo') || document.querySelector('.brand-logo-wrap img');
+              if (!source || !source.complete || !source.naturalWidth) return;
+
+              const canvas = document.createElement('canvas');
+              canvas.width = 180;
+              canvas.height = 180;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) return;
+
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, 180, 180);
+
+              // Clean PBT icon: crop the existing company logo so the old
+              // “RACING” line is not shown on the Home Screen icon.
+              const sw = source.naturalWidth;
+              const sh = source.naturalHeight;
+              const cropH = Math.min(sh, Math.round(sw * 0.82));
+              const sy = Math.max(0, Math.round((sh - cropH) * 0.30));
+              const cropW = Math.min(sw, Math.round(cropH * 0.98));
+              const sx = Math.max(0, Math.round((sw - cropW) / 2));
+
+              ctx.drawImage(source, sx, sy, cropW, cropH, 0, 0, 180, 180);
+              const iconUrl = canvas.toDataURL('image/png');
+
+              ['icon', 'apple-touch-icon'].forEach(rel => {
+                let link = document.querySelector(`link[rel="${rel}"][data-pbt-icon]`);
+                if (!link) {
+                  link = document.createElement('link');
+                  link.rel = rel;
+                  link.setAttribute('data-pbt-icon', 'true');
+                  document.head.appendChild(link);
+                }
+                link.href = iconUrl;
+              });
+            };
+
+            const run = () => setTimeout(installPbtIcon, 100);
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+            else run();
+            window.addEventListener('load', run, { once: true });
+          })();
+          </script>'''
+
+          new_text = text[:start] + new_block + text[script_end + len('</script>'):]
+          path.write_text(new_text, encoding='utf-8')
+          PY
+
+      - name: Commit icon update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No icon change needed."
+          else
+            git commit -m "Fix PBT home screen icon"
+            git push
+          fi
