@@ -1887,9 +1887,9 @@ html,body{overflow-x:hidden;max-width:100vw}
                   <label for="email">E-Mail-Adresse</label>
                   <input id="email" type="email" autocomplete="email" placeholder="z. B. kunde@beispiel.de">
                 </div>
-                <div class="field">
-                  <label for="createdDisplay">Eintrag erstellt am</label>
-                  <input id="createdDisplay" type="date" required>
+                <div class="field" id="createdDisplayField">
+                  <label for="createdDisplay">Eintrag erstellt am <span class="required-star">*</span></label>
+                  <input id="createdDisplay" type="date">
                 </div>
                 <div class="field appointment-field">
                   <label for="changeAppointment">Wechseltermin</label>
@@ -2536,6 +2536,7 @@ function missingImportantFields(c){
   if(!(c.firstName || "").trim()) missing.push("Vorname");
   if(!(c.lastName || "").trim()) missing.push("Nachname");
   if(!(c.licensePlate || "").trim()) missing.push("Kfz-Kennzeichen");
+  if(!(c.createdAt || "").trim()) missing.push("Eintrag erstellt am");
 
   const sets = getCustomerTireSets(c);
   const seasons = Object.keys(sets);
@@ -3327,6 +3328,7 @@ function updateCompletenessNotice(){
     [$("firstNameField"), $("firstName").value.trim() !== ""],
     [$("lastNameField"), $("lastName").value.trim() !== ""],
     [$("licensePlateField"), $("licensePlate").value.trim() !== ""],
+    [$("createdDisplayField"), $("createdDisplay").value.trim() !== ""],
     [$("tireConstructionField"), activeTireSeason !== "" && document.querySelector('input[name="tireConstruction"]:checked') !== null],
     [$("sizeField"), activeTireSeason !== "" && $("size").value.trim() !== "" && (!$("mixedTireSize").checked || $("size2").value.trim() !== "")],
     [$("seasonField"), seasonValue() !== ""]
@@ -3418,6 +3420,8 @@ $("modal").addEventListener("click",e=>{if(e.target.id==="modal") closeModal();}
 $("firstName").addEventListener("input",updateCompletenessNotice);
 $("lastName").addEventListener("input",updateCompletenessNotice);
 $("licensePlate").addEventListener("input",updateCompletenessNotice);
+$("createdDisplay").addEventListener("input",updateCompletenessNotice);
+$("createdDisplay").addEventListener("change",updateCompletenessNotice);
 $("size").addEventListener("input",updateCompletenessNotice);
 $("brand").addEventListener("input",()=>{ if(activeTireSeason) draftTireSets[activeTireSeason]=readTireFields(); updateCompletenessNotice(); });
 let lastStoredSeason = "";
@@ -3435,6 +3439,7 @@ document.querySelectorAll('input[name="season"]').forEach(r=>r.addEventListener(
   // zwischen Sommer-, Winter- und Ganzjahresreifen jederzeit möglich bleibt.
   captureActiveTireSet();
   $("changeAppointment").value="";
+  $("createdDisplay").value="";
   activeTireSeason = next;
   lastStoredSeason = next;
   setSeason(next);
@@ -3467,7 +3472,7 @@ $("customerForm").addEventListener("submit",async e=>{
     customerNumber:$("customerNumber").value.trim().toUpperCase(),
     firstName:$("firstName").value.trim(),lastName:$("lastName").value.trim(),address:$("address").value.trim(),phone:$("phone").value.trim(),email:$("email").value.trim(),storage:$("storage").value.trim(),licensePlate:$("licensePlate").value.trim().toUpperCase(),mileage:$("mileage").value.trim(),vehicleType:$("vehicleType").value,vehicleManufacturer:$("vehicleManufacturer").value.trim(),vehicleModel:$("vehicleModel").value.trim(),rdks:$("rdks").checked,rdksType:$("rdks").checked?$("rdksType").value:"",
     tireSets, tireConstruction:primary.tireConstruction,rimType:primary.rimType,quantity:primary.quantity,brand:primary.brand,size:primary.size,season:primarySeason,storedSeason:(activeTireSeason||primarySeason),changeAppointment:$("changeAppointment").value||"",fl:primary.fl,fr:primary.fr,rl:primary.rl,rr:primary.rr,wash:primary.wash,
-    notes:$("notes").value.trim(),createdAt:$("createdDisplay").value||todayISO()
+    notes:$("notes").value.trim(),createdAt:$("createdDisplay").value||""
   };
   const ok = await upsertCustomer(item);
   if(!ok) return;
