@@ -1545,6 +1545,31 @@ html,body{overflow-x:hidden;max-width:100vw}
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- PBT-HOME-ICON-V1 -->
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-title" content="Reifenservice">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script>
+(() => {
+  const installPbtIcon = () => {
+    const logo = document.querySelector('.auth-brand .logo') || document.querySelector('.brand-logo-wrap img');
+    if (!logo || !logo.src) return;
+    ['icon', 'apple-touch-icon'].forEach(rel => {
+      let link = document.querySelector(`link[rel="${rel}"][data-pbt-icon]`);
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = rel;
+        link.setAttribute('data-pbt-icon', 'true');
+        document.head.appendChild(link);
+      }
+      link.href = logo.src;
+    });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installPbtIcon);
+  else installPbtIcon();
+  window.addEventListener('load', installPbtIcon, { once: true });
+})();
+</script>
 </head>
 <body>
 <div class="auth-screen" id="authScreen">
