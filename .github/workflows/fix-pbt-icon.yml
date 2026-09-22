@@ -101,11 +101,39 @@ jobs:
           print("Entry-date handling updated." if html != original else "No changes needed.")
           PY
 
+      - name: Keep new customer entry date empty and optimize mobile date picker
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("index.html")
+          html = path.read_text(encoding="utf-8")
+
+          old = 'function normalizeDateValue(value){\n  if(!value) return todayISO();'
+          new = 'function normalizeDateValue(value){\n  if(!value) return "";'
+          if old not in html:
+              raise SystemExit("normalizeDateValue fragment not found")
+          html = html.replace(old, new, 1)
+
+          old = '  $("createdDisplay").value=todayISO();\n  $("modalTitle").textContent="Kunde hinzufügen";'
+          new = '  $("createdDisplay").value="";\n  $("modalTitle").textContent="Kunde hinzufügen";'
+          if old not in html:
+              raise SystemExit("openNew createdDisplay fragment not found")
+          html = html.replace(old, new, 1)
+
+          mobile_css = '''\n/* Mobile: Eintrag erstellt am – gut bedienbarer nativer Datumsauswähler */\n@media(max-width:600px){\n  #createdDisplayField{\n    width:100%;\n    max-width:100%;\n  }\n  #createdDisplay{\n    width:100%;\n    min-height:44px;\n    height:44px;\n    font-size:16px;\n    padding:10px 11px;\n    -webkit-appearance:auto;\n    appearance:auto;\n  }\n}\n'''
+          if '/* Mobile: Eintrag erstellt am – gut bedienbarer nativer Datumsauswähler */' not in html:
+              html = html.replace('</style>', mobile_css + '</style>', 1)
+
+          path.write_text(html, encoding="utf-8")
+          print("New-customer entry date is now empty; mobile date picker optimized.")
+          PY
+
       - name: Commit icon fix
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html apple-touch-icon.png
           git diff --cached --quiet && exit 0
-          git commit -m "Fix PBT home screen icon [skip icon]"
+          git commit -m "Keep entry date empty and optimize mobile date picker [skip icon]"
           git push
