@@ -41,22 +41,19 @@ jobs:
           icon.alpha_composite(fitted, ((180 - fitted.width) // 2, (180 - fitted.height) // 2))
           icon.save("apple-touch-icon.png", "PNG", optimize=True)
 
-          pattern = re.compile(
-              r'<script>\s*\(\(\) => \{\s*const (?:source|logo) = '
-              r'document\.querySelector\([^)]+\) \|\| '
-              r'document\.querySelector\([^)]+\);.*?</script>',
-              re.S
-          )
-          html, removed = pattern.subn('', html, count=2)
-          if removed != 2:
-              raise SystemExit(f"Expected 2 old icon scripts, removed {removed}")
+          # Remove every old dynamic PBT icon installer. The old code used
+          # the full logo and therefore put the word RACING back on iOS.
+          pattern = re.compile(r'<script>.*?installPbtIcon.*?</script>', re.S)
+          html, removed = pattern.subn('', html)
+          if removed < 1:
+              print("No old dynamic icon installer found; continuing.")
 
-          link = '<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">'
-          if 'apple-touch-icon.png?v=2' not in html:
+          link = '<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">'
+          if 'apple-touch-icon.png?v=3' not in html:
               html = html.replace("</head>", f"  {link}\n</head>", 1)
 
           html_path.write_text(html, encoding="utf-8")
-          print("Updated index.html and generated apple-touch-icon.png")
+          print(f"Updated index.html; removed {removed} dynamic icon installer(s).")
           PY
 
       - name: Commit icon fix
