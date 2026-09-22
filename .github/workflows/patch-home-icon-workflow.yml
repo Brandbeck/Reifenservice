@@ -1,0 +1,46 @@
+name: Patch Home Icon Workflow
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update existing icon workflow
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('.github/workflows/set-home-icon.yml')
+          text = path.read_text(encoding='utf-8')
+
+          pattern = re.compile(r"          if 'PBT-HOME-ICON-V1' not in text:\n.*?          text = text\.replace\('</head>', injection \+ '</head>', 1\)\n", re.S)
+
+          replacement = '''          if 'PBT-HOME-ICON-V2' not in text:
+              injection = ''' + "'''<!-- PBT-HOME-ICON-V2 -->\n          <meta name=\"theme-color\" content=\"#ffffff\">\n          <meta name=\"apple-mobile-web-app-title\" content=\"Reifenservice\">\n          <meta name=\"apple-mobile-web-app-capable\" content=\"yes\">\n          <script>\n          (() => {\n            const installPbtIcon = () => {\n              const source = document.querySelector('.auth-brand .logo') || document.querySelector('.brand-logo-wrap img');\n              if (!source || !source.complete || !source.naturalWidth) return;\n              const canvas = document.createElement('canvas');\n              canvas.width = 180; canvas.height = 180;\n              const ctx = canvas.getContext('2d');\n              if (!ctx) return;\n              ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 180, 180);\n              const sw = source.naturalWidth, sh = source.naturalHeight;\n              const cropH = Math.min(sh, Math.round(sw * 0.82));\n              const sy = Math.max(0, Math.round((sh - cropH) * 0.30));\n              const cropW = Math.min(sw, Math.round(cropH * 0.98));\n              const sx = Math.max(0, Math.round((sw - cropW) / 2));\n              ctx.drawImage(source, sx, sy, cropW, cropH, 0, 0, 180, 180);\n              const iconUrl = canvas.toDataURL('image/png');\n              ['icon', 'apple-touch-icon'].forEach(rel => {\n                let link = document.querySelector(`link[rel=\"${rel}\"][data-pbt-icon]`);\n                if (!link) { link = document.createElement('link'); link.rel = rel; link.setAttribute('data-pbt-icon', 'true'); document.head.appendChild(link); }\n                link.href = iconUrl;\n              });\n            };\n            const run = () => setTimeout(installPbtIcon, 100);\n            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();\n            window.addEventListener('load', run, { once: true });\n          })();\n          </script>\n          '''" + "'''" + '''
+              text = text.replace('</head>', injection + '</head>', 1)
+'''
+
+          new_text, count = pattern.subn(replacement, text, count=1)
+          if count != 1:
+              raise SystemExit('Existing PBT icon block not found')
+          path.write_text(new_text, encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/set-home-icon.yml
+          if git diff --cached --quiet; then
+            echo "No changes needed."
+          else
+            git commit -m "Use clean PBT home screen icon"
+            git push
+          fi
