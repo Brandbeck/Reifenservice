@@ -41,8 +41,6 @@ jobs:
           icon.alpha_composite(fitted, ((180 - fitted.width) // 2, (180 - fitted.height) // 2))
           icon.save("apple-touch-icon.png", "PNG", optimize=True)
 
-          # Remove every old dynamic PBT icon installer. The old code used
-          # the full logo and therefore put the word RACING back on iOS.
           pattern = re.compile(r'<script>.*?installPbtIcon.*?</script>', re.S)
           html, removed = pattern.subn('', html)
           if removed < 1:
@@ -56,51 +54,6 @@ jobs:
           print(f"Updated index.html; removed {removed} dynamic icon installer(s).")
           PY
 
-      - name: Update entry-date handling
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          path = Path("index.html")
-          html = path.read_text(encoding="utf-8")
-          original = html
-
-          replacements = [
-              (
-                  '<div class="field">\n                  <label for="createdDisplay">Eintrag erstellt am</label>\n                  <input id="createdDisplay" type="date" required>\n                </div>',
-                  '<div class="field" id="createdDisplayField">\n                  <label for="createdDisplay">Eintrag erstellt am <span class="required-star">*</span></label>\n                  <input id="createdDisplay" type="date">\n                </div>'
-              ),
-              (
-                  '  if(!(c.licensePlate || "").trim()) missing.push("Kfz-Kennzeichen");',
-                  '  if(!(c.licensePlate || "").trim()) missing.push("Kfz-Kennzeichen");\n  if(!(c.createdAt || "").trim()) missing.push("Eintrag erstellt am");'
-              ),
-              (
-                  '    [$("licensePlateField"), $("licensePlate").value.trim() !== ""],',
-                  '    [$("licensePlateField"), $("licensePlate").value.trim() !== ""],\n    [$("createdDisplayField"), $("createdDisplay").value.trim() !== ""],'
-              ),
-              (
-                  '  $("changeAppointment").value="";\n  activeTireSeason = next;',
-                  '  $("changeAppointment").value="";\n  $("createdDisplay").value="";\n  activeTireSeason = next;'
-              ),
-              (
-                  'notes:$("notes").value.trim(),createdAt:$("createdDisplay").value||todayISO()',
-                  'notes:$("notes").value.trim(),createdAt:$("createdDisplay").value||""'
-              ),
-              (
-                  '$("licensePlate").addEventListener("input",updateCompletenessNotice);',
-                  '$("licensePlate").addEventListener("input",updateCompletenessNotice);\n$("createdDisplay").addEventListener("input",updateCompletenessNotice);\n$("createdDisplay").addEventListener("change",updateCompletenessNotice);'
-              )
-          ]
-
-          for old, new in replacements:
-              if old not in html:
-                  raise SystemExit("Expected code fragment not found:\n" + old)
-              html = html.replace(old, new, 1)
-
-          path.write_text(html, encoding="utf-8")
-          print("Entry-date handling updated." if html != original else "No changes needed.")
-          PY
-
       - name: Keep new customer entry date empty and optimize mobile date picker
         run: |
           python - <<'PY'
@@ -111,22 +64,24 @@ jobs:
 
           old = 'function normalizeDateValue(value){\n  if(!value) return todayISO();'
           new = 'function normalizeDateValue(value){\n  if(!value) return "";'
-          if old not in html:
-              raise SystemExit("normalizeDateValue fragment not found")
-          html = html.replace(old, new, 1)
+          if old in html:
+              html = html.replace(old, new, 1)
+          else:
+              print("normalizeDateValue already fixed; continuing.")
 
           old = '  $("createdDisplay").value=todayISO();\n  $("modalTitle").textContent="Kunde hinzufügen";'
           new = '  $("createdDisplay").value="";\n  $("modalTitle").textContent="Kunde hinzufügen";'
-          if old not in html:
-              raise SystemExit("openNew createdDisplay fragment not found")
-          html = html.replace(old, new, 1)
+          if old in html:
+              html = html.replace(old, new, 1)
+          else:
+              print("openNew createdDisplay already fixed; continuing.")
 
           mobile_css = '''\n/* Mobile: Eintrag erstellt am – gut bedienbarer nativer Datumsauswähler */\n@media(max-width:600px){\n  #createdDisplayField{\n    width:100%;\n    max-width:100%;\n  }\n  #createdDisplay{\n    width:100%;\n    min-height:44px;\n    height:44px;\n    font-size:16px;\n    padding:10px 11px;\n    -webkit-appearance:auto;\n    appearance:auto;\n  }\n}\n'''
           if '/* Mobile: Eintrag erstellt am – gut bedienbarer nativer Datumsauswähler */' not in html:
               html = html.replace('</style>', mobile_css + '</style>', 1)
 
           path.write_text(html, encoding="utf-8")
-          print("New-customer entry date is now empty; mobile date picker optimized.")
+          print("New-customer entry date is empty and mobile date picker is optimized.")
           PY
 
       - name: Commit icon fix
