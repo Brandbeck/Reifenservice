@@ -1600,6 +1600,23 @@ html,body{overflow-x:hidden;max-width:100vw}
   #prepareView .preparation-empty{margin:0 10px 12px}
 }
 
+
+/* Mobile: Eintrag erstellt am – gut bedienbarer nativer Datumsauswähler */
+@media(max-width:600px){
+  #createdDisplayField{
+    width:100%;
+    max-width:100%;
+  }
+  #createdDisplay{
+    width:100%;
+    min-height:44px;
+    height:44px;
+    font-size:16px;
+    padding:10px 11px;
+    -webkit-appearance:auto;
+    appearance:auto;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- PBT-HOME-ICON-V2 -->
@@ -2515,7 +2532,7 @@ function todayISO(){
   return new Date(d.getTime() - offset * 60000).toISOString().slice(0,10);
 }
 function normalizeDateValue(value){
-  if(!value) return todayISO();
+  if(!value) return "";
   if(/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return String(value);
   const d = new Date(value);
   if(Number.isNaN(d.getTime())) return todayISO();
@@ -3341,7 +3358,7 @@ function openNew(){
   editingId=null;
   document.body.classList.add("modal-open");
   resetForm();
-  $("createdDisplay").value=todayISO();
+  $("createdDisplay").value="";
   $("modalTitle").textContent="Kunde hinzufügen";
   $("deleteBtn").style.display="none";
   $("modal").classList.add("open");
